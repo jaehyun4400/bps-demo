@@ -1,0 +1,21 @@
+# Windows 메타데이터
+*Zone.Identifier
+
+# 세션 로그
+SESSION_LOG_*.md
+
+# 참고용 파일 (불필요)
+monsters.mp4
+format_tables.py
+example.jpeg
+redeemcode.jpg
+
+# 루트의 중복 이미지 (폴더 안에 이미 있음)
+/bow_girl.png
+/mage_girl.png
+/normal_girl.png
+/sword_girl.png
+/choisg.png
+/gungny.png
+/gungny2.png
+/hye.png
