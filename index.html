@@ -1337,7 +1337,7 @@ function calcCP() {
 
 function getChar()   { return CHARS.find(c=>c.id===S.char)||CHARS[0]; }
 function getWeapon() { return S.weapon ? WEAPONS.find(w=>w.id===S.weapon) : null; }
-function getWpType() { const w=getWeapon(); return w?w.type:'sword'; }
+function getWpType() { const w=getWeapon(); return w?w.type:''; }
 function buildEnemySprite(e, small){
   const cls='mob-token'+(small?' sm':'')+(e.isRanged?' ranged':'')+(((e.maxHp||e.hp)>=3000)?' elite':'');
   return `<div class="ae-sprite ${cls}" id="espTMP"><span class="mob-emoji">${e.emoji}</span><div class="mob-token-shine" aria-hidden="true"></div></div>`;
