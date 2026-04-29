@@ -2237,7 +2237,9 @@ function getLastClearedStage(dIdx){
 
 // ─── RESULT ───
 function showResult(win){
-  const isBoss=isBossStage(S.dungeon,S.stage),isLast=S.stage===(DUNGEONS[S.dungeon].stageCount||10)-1;
+  const isBoss=isBossStage(S.dungeon,S.stage);
+  const isLastStage=S.stage===(DUNGEONS[S.dungeon].stageCount||10)-1;
+  const isLast=isLastStage&&S.dungeon===DUNGEONS.length-1;
   const rw=stageReward(S.dungeon,S.stage);
   const label=stageLabel(S.dungeon,S.stage);
   const ch=getChar();
