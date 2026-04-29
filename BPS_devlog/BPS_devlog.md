@@ -82,6 +82,25 @@ const isLast = isLastStage && S.dungeon === DUNGEONS.length - 1;
 
 세션 간 메모리 유실 방지를 위해 `CLAUDE.md`를 프로젝트 루트에 생성했다. Claude Code가 매 세션 시작 시 자동으로 읽는 파일로, GitHub에 공개 커밋(B 방식)으로 운용 중이다. 필요 시 `.gitignore`로 전환(A 방식) 가능하도록 결정해두었다.
 
+### 파일 정리
+
+`BPS_Prototype_QA.html` 파일이 `index.html`과 별도로 존재하고 있었는데, 오늘 기준으로 82줄 뒤처진 구버전 상태였다. Canvas HP 오브, 쉴드 비주얼 등 이번 작업이 전혀 반영되지 않은 파일을 두 개 유지하는 건 혼란만 초래한다고 판단해 삭제했다. GitHub Pages는 `index.html` 단일 파일로만 운용한다. (GitHub Pages 웹 서버가 `/` 경로 접근 시 `index.html`을 자동 반환하는 규약에 따름)
+
+`readme.jpg`도 프로젝트 루트에 있던 것을 `reference/` 폴더로 이동 정리했다.
+
+### 버그 수정 — 무기 미착용 시 SD 캐릭터 오표시
+
+무기를 착용하지 않은 상태인데 `sword_girl.png`가 노출되는 문제를 발견했다. 원인은 `getWpType()` 함수의 폴백값이 `'sword'`로 하드코딩되어 있었기 때문이다.
+
+```js
+// 수정 전
+function getWpType() { const w=getWeapon(); return w?w.type:'sword'; }
+// 수정 후
+function getWpType() { const w=getWeapon(); return w?w.type:''; }
+```
+
+빈 문자열을 반환하면 `getSDCharImg()`의 기본 분기로 떨어져 `normal_girl.png`가 정상 표시된다. 추가로 `getWpType()==='sword'` 비교를 사용하는 `doAttackAnim()`도 영향 없음을 확인했다 — 무기 없을 때 검기 애니메이션이 나오지 않는 것이 오히려 올바른 동작이다.
+
 ---
 
 ## 2026-04-24 — D7 던전 + SD 치비 캐릭터 시스템 + 근거리 버그 수정

@@ -29,10 +29,15 @@
 - **자동돌파 보스 클리어 후 멈춤 수정**
   - D1~D6 보스 스테이지 클리어 시 자동돌파가 다음 던전으로 진행하지 않고 멈추던 문제 수정
   - `isLast` 조건이 "마지막 던전의 마지막 스테이지"일 때만 true가 되도록 교정
+- **무기 미착용 시 SD 캐릭터 오표시 수정**
+  - 무기를 착용하지 않은 상태에서 `sword_girl.png`가 노출되던 문제 수정
+  - `getWpType()` 폴백값 `'sword'` → `''` 로 변경, `normal_girl.png` 정상 표시
 
 ### 배포 / 문서
 - GitHub Pages 배포 완료: https://jaehyun4400.github.io/bps-demo/
 - CLAUDE.md 생성 — 세션 간 메모리 유실 방지용 작업 가이드 (배포 URL, 협업 규칙, 구현 현황 포함)
+- `BPS_Prototype_QA.html` 삭제 — `index.html` 단일 파일로 통합
+- `readme.jpg` → `reference/` 폴더로 이동
 
 ---
 

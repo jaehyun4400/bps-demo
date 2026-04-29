@@ -289,6 +289,7 @@ QA 포트폴리오에 등재할 가상의 모바일 게임 **"Blades of Plumflow
 | 캐릭터 변경 시 오라 즉시 미반영                   | `updateSDChar()` 가 이미지만 갱신                        | 오라 클래스 + 이름 함께 갱신하도록 확장     |
 | 자동돌파 D1~D6 보스 클리어 후 멈춤                | `isLast`가 "마지막 스테이지"만 체크해 D1~D6 보스도 true  | "마지막 던전의 마지막 스테이지"일 때만 true |
 | HP 오브 도넛 UI에서 쉴드 표시 불가               | `conic-gradient` 방식으로는 레이어 분리 불가             | Canvas 기반 액체 구체로 전면 교체           |
+| 무기 미착용 시 sword_girl SD 이미지 오표시        | `getWpType()` 폴백값이 `'sword'`로 하드코딩              | 폴백을 `''`로 변경 → `normal_girl` 표시     |
 
 ---
 
