@@ -167,9 +167,10 @@ body { background:#0a0a0a; display:flex; justify-content:center; align-items:cen
 .ap-sprite { display:flex; justify-content:center; }
 .boss-sd-wrap .field-sd-img { width:50px; }
 .ap-name { font-size:9px; color:var(--text); }
-.ap-hp-bar { width:70px; height:5px; background:#1a0810; border-radius:3px; overflow:hidden; }
+.ap-hp-bar { width:70px; height:5px; background:#1a0810; border-radius:3px; overflow:hidden; position:relative; }
 .ap-hp-fill { height:100%; background:#22c55e; border-radius:3px; transition:width .4s; }
 .ap-hp-fill.low { background:#ef4444; }
+.ap-shield-fill { height:100%; background:rgba(100,185,255,.7); border-radius:3px; position:absolute; top:0; left:0; transition:width .4s; pointer-events:none; }
 .arena-enemies { position:absolute; right:14px; top:50%; transform:translateY(-50%); display:flex; flex-direction:column; gap:10px; justify-content:center; }
 .arena-enemy { display:flex; flex-direction:column; align-items:center; gap:2px; position:relative; }
 .ae-sprite { font-size:30px; transition:all .25s; }
@@ -235,10 +236,17 @@ body { background:#0a0a0a; display:flex; justify-content:center; align-items:cen
 .field-sd-aura-SR::after  { background:radial-gradient(ellipse 80% 90% at 50% 62%, rgba(167,139,250,.42) 0%, transparent 70%); }
 .field-sd-aura-R::after   { background:radial-gradient(ellipse 80% 90% at 50% 62%, rgba(96,165,250,.42) 0%, transparent 70%); }
 @keyframes sdAuraPulse { 0%,100%{transform:scale(.85);opacity:.3;} 50%{transform:scale(1.12);opacity:.72;} }
-.hp-orb { position:absolute; bottom:6px; left:6px; width:56px; height:56px; border-radius:50%; display:flex; align-items:center; justify-content:center; z-index:10; box-shadow:0 0 14px rgba(239,68,68,.4); border:2px solid rgba(239,68,68,.55); }
-.hp-orb-in { width:42px; height:42px; border-radius:50%; background:#110306; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px; pointer-events:none; }
-.hp-orb-pct { font-size:10px; color:#f87171; font-weight:bold; line-height:1; }
-.hp-orb-lb { font-size:7px; color:var(--dim); }
+.hp-orb { position:absolute; bottom:6px; left:6px; width:72px; height:72px; z-index:10; border-radius:50%; }
+.hp-orb-canvas { position:absolute; inset:0; width:100%; height:100%; border-radius:50%; display:block; }
+.hp-orb-ring { position:absolute; inset:-1px; border-radius:50%; border:2px solid rgba(160,35,35,.75); box-shadow:0 0 18px rgba(220,50,50,.55),inset 0 0 12px rgba(0,0,0,.65); pointer-events:none; }
+.hp-orb-shield-ring { position:absolute; inset:-6px; border-radius:50%; border:2px solid rgba(130,200,255,.88); box-shadow:0 0 14px rgba(100,180,255,.75),0 0 26px rgba(100,180,255,.38); pointer-events:none; display:none; animation:shieldRingPulse 2s ease-in-out infinite; }
+.hp-orb-shield-ring.shatter { animation:shieldShatter .42s ease-out forwards; }
+.hp-orb-shield-ring.cooldown { animation:none; border-color:rgba(110,130,160,.5); box-shadow:0 0 8px rgba(110,130,160,.3); opacity:.45; }
+@keyframes shieldRingPulse { 0%,100%{box-shadow:0 0 10px rgba(100,180,255,.5),0 0 20px rgba(100,180,255,.22);opacity:.82;} 50%{box-shadow:0 0 22px rgba(100,180,255,.92),0 0 34px rgba(100,180,255,.5);opacity:1;} }
+@keyframes shieldShatter { 0%{opacity:1;transform:scale(1);} 35%{opacity:.95;transform:scale(1.2);border-color:rgba(220,240,255,.98);} 100%{opacity:0;transform:scale(1.45);} }
+.hp-orb-text { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; pointer-events:none; z-index:2; gap:1px; }
+.hp-orb-pct { font-size:11px; color:#fca5a5; font-weight:bold; line-height:1; text-shadow:0 1px 5px rgba(0,0,0,.95); }
+.hp-orb-lb { font-size:7px; color:var(--dim); text-shadow:0 1px 3px rgba(0,0,0,.95); }
 .field-subbar { background:rgba(0,0,0,.6); border-bottom:1px solid var(--border); padding:4px 12px; display:none; align-items:center; justify-content:space-between; flex-shrink:0; }
 #screen-battle.field-active .field-subbar { display:flex; }
 .fsb-loc { color:var(--dim); font-size:10px; }
@@ -580,7 +588,7 @@ body { background:#0a0a0a; display:flex; justify-content:center; align-items:cen
     <div class="arena-player" id="arena-player">
       <div class="ap-sprite" id="ap-sprite">👩</div>
       <div class="ap-name" id="ap-name">궁중시녀</div>
-      <div class="ap-hp-bar"><div class="ap-hp-fill" id="ap-hp-fill" style="width:100%"></div></div>
+      <div class="ap-hp-bar"><div class="ap-hp-fill" id="ap-hp-fill" style="width:100%"></div><div class="ap-shield-fill" id="ap-shield-fill" style="width:0%;display:none"></div></div>
     </div>
     <div class="arena-enemies" id="arena-enemies"></div>
   </div>
@@ -1286,6 +1294,7 @@ const S = {
 let _spawnTimer = null;
 let _fieldLoop = null;
 let _inBattle = false;
+let _orbAnimFrame=null,_orbWaveT=0,_orbShieldShatter=false,_orbShatterEnd=0;
 const PLAYER_SPEED = 4.5, MON_SPEED = 2.5, JOY_RADIUS = 36;
 const MELEE_RANGE = 80, RANGED_RANGE = 170, RANGED_STOP = 130, MELEE_STOP = 74;
 const FIELD_SPAWN_INNER_RATIO = 0.72;
@@ -1989,6 +1998,8 @@ function renderPlayer(){
     const pct=Math.max(0,S.playerHp/S.playerMaxHp*100);
     const bar=document.getElementById('ap-hp-fill');
     bar.style.width=pct+'%';bar.className='ap-hp-fill'+(pct<30?' low':'');
+    const shBar=document.getElementById('ap-shield-fill');
+    if(shBar){const sp=Math.max(0,Math.min(S.shield/S.playerMaxHp*100,100-pct));shBar.style.width=sp+'%';shBar.style.left=pct+'%';shBar.style.display=sp>0?'':'none';}
   }
 }
 function renderEnemies(){
@@ -2136,6 +2147,9 @@ function applyShieldAbsorb(dmg){
   if(S.shield===0){
     S.shieldCooldownEnd=Date.now()+20000;
     addLog('lp','🛡️ 보호막 소진 — 20초 후 재발동 대기');
+    _orbShieldShatter=true;_orbShatterEnd=Date.now()+450;
+    const sr=document.getElementById('hp-shield-ring');
+    if(sr){sr.classList.remove('cooldown');sr.classList.add('shatter');}
   } else {
     addLog('lp',`🛡️ 보호막 ${absorbed} 흡수! (잔여: ${S.shield})`);
   }
@@ -2404,6 +2418,7 @@ function advanceBattleStage(){
   const st=getCharStats(S.char);
   S.playerHp=Math.min(S.playerMaxHp,S.playerHp+Math.round(st.maxHp*0.3));
   S.shield=0;S.shieldCooldownEnd=0;S.stageKills=0;
+  checkShieldPassive();
   const label=stageLabel(S.dungeon,S.stage),isBoss=isBossStage(S.dungeon,S.stage);
   document.getElementById('battle-top-label').textContent='⚔️ '+label;
   if(isFieldMode()){
@@ -2711,6 +2726,12 @@ function startFieldLoop(){
   _fieldLoop=setInterval(fieldUpdate,40);
 }
 function stopFieldLoop(){if(_fieldLoop){clearInterval(_fieldLoop);_fieldLoop=null;}}
+function startOrbAnim(){
+  if(_orbAnimFrame)return;
+  function draw(){_orbWaveT+=0.038;drawHpOrb();_orbAnimFrame=requestAnimationFrame(draw);}
+  draw();
+}
+function stopOrbAnim(){if(_orbAnimFrame){cancelAnimationFrame(_orbAnimFrame);_orbAnimFrame=null;}}
 function fieldUpdate(){
   if(!_inBattle)return;
   const arena=document.getElementById('battle-arena');
@@ -2782,10 +2803,11 @@ function initFieldUI(isBoss){
   const jb=document.createElement('div');jb.className='joy-base';jb.id='joy-base';
   const jk=document.createElement('div');jk.className='joy-knob';jk.id='joy-knob';
   jb.appendChild(jk);arena.appendChild(jb);
-  // HP 구슬
+  // HP 구슬 (디아블로 스타일 액체 오브)
   const orb=document.createElement('div');orb.className='hp-orb';orb.id='hp-orb';
-  orb.innerHTML=`<div class="hp-orb-in"><div class="hp-orb-pct" id="hp-orb-pct">100%</div><div class="hp-orb-lb">HP</div></div>`;
+  orb.innerHTML=`<canvas class="hp-orb-canvas" id="hp-canvas" width="72" height="72"></canvas><div class="hp-orb-ring"></div><div class="hp-orb-shield-ring" id="hp-shield-ring"></div><div class="hp-orb-text"><span class="hp-orb-pct" id="hp-orb-pct">100%</span><span class="hp-orb-lb">HP</span></div>`;
   arena.appendChild(orb);
+  startOrbAnim();
   // 서브바 갱신
   const dg=DUNGEONS[S.dungeon];
   const fl=document.getElementById('fsb-loc');if(fl)fl.textContent=`D${S.dungeon+1} ${dg.name}`;
@@ -2809,17 +2831,77 @@ function cleanupFieldUI(){
   arena.removeEventListener('pointerup',_joyUp);
   arena.removeEventListener('pointercancel',_joyUp);
   const ap=document.getElementById('arena-player');if(ap)ap.style.display='';
+  stopOrbAnim();
   ['field-char-el','joy-base','hp-orb'].forEach(id=>{const e=document.getElementById(id);if(e)e.remove();});
   const ae=document.getElementById('arena-enemies');if(ae)ae.style.cssText='';
 }
-function renderHpOrb(){
-  const orb=document.getElementById('hp-orb');if(!orb)return;
+function drawHpOrb(){
+  const canvas=document.getElementById('hp-canvas');if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  const W=canvas.width,H=canvas.height,R=W/2;
   const pct=Math.max(0,S.playerHp/S.playerMaxHp);
-  const deg=Math.round(pct*360);
-  const col=pct>0.5?'#ef4444':pct>0.25?'#f97316':'#dc2626';
-  orb.style.background=`conic-gradient(${col} ${deg}deg,#1a0810 ${deg}deg)`;
+  const shPct=Math.min(Math.max(0,S.shield/S.playerMaxHp),1-pct);
+  ctx.clearRect(0,0,W,H);
+  ctx.save();
+  ctx.beginPath();ctx.arc(R,R,R-1,0,Math.PI*2);ctx.clip();
+  // 배경
+  const bg=ctx.createRadialGradient(R,R,0,R,R,R);
+  bg.addColorStop(0,'#1a050c');bg.addColorStop(1,'#0a0208');
+  ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+  const wA=1.8;
+  // HP 액체 (빨강)
+  if(pct>0.002){
+    const hy=H*(1-pct);
+    const col=pct>0.5?'#ef4444':pct>0.25?'#f97316':'#dc2626';
+    const col2=pct>0.5?'#7f1d1d':pct>0.25?'#7c2d12':'#7f1d1d';
+    ctx.beginPath();
+    ctx.moveTo(0,hy+Math.sin(_orbWaveT)*wA);
+    for(let x=0;x<=W;x++)ctx.lineTo(x,hy+Math.sin(_orbWaveT+x*.15)*wA);
+    ctx.lineTo(W,H);ctx.lineTo(0,H);ctx.closePath();
+    const g=ctx.createLinearGradient(0,hy,0,H);
+    g.addColorStop(0,col);g.addColorStop(1,col2);
+    ctx.fillStyle=g;ctx.fill();
+  }
+  // 쉴드 액체 (파랑, HP 위)
+  if(shPct>0.002){
+    const hpY=H*(1-pct);
+    const shTopY=H*(1-pct-shPct);
+    ctx.beginPath();
+    ctx.moveTo(0,shTopY+Math.sin(_orbWaveT+1.3)*wA);
+    for(let x=0;x<=W;x++)ctx.lineTo(x,shTopY+Math.sin(_orbWaveT+1.3+x*.12)*wA);
+    ctx.lineTo(W,hpY+wA+1);ctx.lineTo(0,hpY+wA+1);ctx.closePath();
+    const sg=ctx.createLinearGradient(0,shTopY,0,hpY);
+    sg.addColorStop(0,'rgba(160,220,255,0.8)');sg.addColorStop(1,'rgba(59,140,255,0.6)');
+    ctx.fillStyle=sg;ctx.fill();
+  }
+  // 유리 광택
+  const gl=ctx.createRadialGradient(R*.52,R*.32,0,R*.5,R*.38,R*.58);
+  gl.addColorStop(0,'rgba(255,255,255,.24)');gl.addColorStop(.6,'rgba(255,255,255,.06)');gl.addColorStop(1,'rgba(255,255,255,0)');
+  ctx.fillStyle=gl;ctx.fillRect(0,0,W,H);
+  // 어두운 테두리 안쪽
+  const rim=ctx.createRadialGradient(R,R,R*.68,R,R,R-.5);
+  rim.addColorStop(0,'rgba(0,0,0,0)');rim.addColorStop(1,'rgba(0,0,0,.52)');
+  ctx.fillStyle=rim;ctx.fillRect(0,0,W,H);
+  ctx.restore();
+  // 텍스트
   const pe=document.getElementById('hp-orb-pct');if(pe)pe.textContent=Math.round(pct*100)+'%';
+  // 쉴드 링 표시
+  const sr=document.getElementById('hp-shield-ring');
+  if(sr){
+    const now=Date.now();
+    if(shPct>0.002&&!sr.classList.contains('shatter')){
+      sr.style.display='block';sr.classList.remove('cooldown','shatter');
+    } else if(_orbShieldShatter&&now<_orbShatterEnd){
+      sr.style.display='block';
+    } else if(S.shieldCooldownEnd>0&&now<S.shieldCooldownEnd&&!sr.classList.contains('shatter')){
+      sr.style.display='block';
+      if(!sr.classList.contains('cooldown')){sr.classList.remove('shatter');sr.classList.add('cooldown');}
+    } else if(!sr.classList.contains('shatter')){
+      sr.style.display='none';sr.classList.remove('cooldown');_orbShieldShatter=false;
+    }
+  }
 }
+function renderHpOrb(){drawHpOrb();}
 function updateFieldKillCounter(){
   const el=document.getElementById('fsb-kill');if(el)el.textContent=`처치 ${S.fieldKills} / 30`;
 }
