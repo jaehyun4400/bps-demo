@@ -106,3 +106,6 @@
 | `advanceBattleStage()` | 스테이지 진행, 쉴드/쿨타임 리셋 + 즉시 발동 체크 |
 | `initFieldUI()` | 필드 모드 초기화 + 오브 생성 |
 | `renderPlayer()` | 플레이어 HP/쉴드 UI 갱신 |
+| `doAttackAnim(onHit,targetIdx)` | 무기 타입별 공격 발사체 + 이펙트 처리 |
+| `showRingImpact(x,y,bColor,fColor)` | 링 충격파 공용 함수 (bow=파랑 / orb=빨강 / 미착용=황금) |
+| `showPunchImpact(x,y)` | `showRingImpact` 황금색 래퍼 (미착용 전용) |

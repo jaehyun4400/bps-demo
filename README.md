@@ -210,6 +210,11 @@ QA 포트폴리오에 등재할 가상의 모바일 게임 **"Blades of Plumflow
 - **자동돌파 버그 수정**
   - D1~D6 보스 클리어 후 자동돌파가 멈추는 문제 수정
   - `isLast` 조건을 "마지막 던전의 마지막 스테이지"일 때만 true로 교정
+- **무기별 공격 이펙트 시스템 개편**
+  - bow: 각도 회전 화살(➤) 발사체 → 파란 링 충격파
+  - orb: 파이어볼 발사체 → 빨간 링 충격파
+  - 미착용(normal_girl): 👊 주먹 발사체 → 황금 링 충격파
+  - 필드·보스 모드 모두 적용, `showRingImpact()` 공용 함수로 통합 (링 크기 10% 축소)
 - **GitHub Pages 배포 + CLAUDE.md 생성**
   - 라이브 데모: https://jaehyun4400.github.io/bps-demo/
   - `CLAUDE.md` 생성 — 세션 간 메모리 유실 방지용 작업 가이드
@@ -331,7 +336,7 @@ QA 포트폴리오에 등재할 가상의 모바일 게임 **"Blades of Plumflow
 | sword     | sword_girl.png  | SSR: 금빛 / SR: 보라 / R: 파랑 | 검기 시각 효과 연동     |
 | bow       | bow_girl.png    | SSR: 금빛 / SR: 보라 / R: 파랑 | 화살 발사 효과 연동     |
 | orb       | mage_girl.png   | SSR: 금빛 / SR: 보라 / R: 파랑 | 파이어볼 범위 효과 연동 |
-| (미장착)  | normal_girl.png | —                              | —                       |
+| (미장착)  | normal_girl.png | —                              | 👊 주먹 발사체 + 황금 링 충격파 |
 
 - 필드 전투: 45px, 보스 전투: 50px (10% 크게)
 - 적 위치 기준 좌우 반전 자동 적용

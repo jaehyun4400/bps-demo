@@ -101,6 +101,23 @@ function getWpType() { const w=getWeapon(); return w?w.type:''; }
 
 빈 문자열을 반환하면 `getSDCharImg()`의 기본 분기로 떨어져 `normal_girl.png`가 정상 표시된다. 추가로 `getWpType()==='sword'` 비교를 사용하는 `doAttackAnim()`도 영향 없음을 확인했다 — 무기 없을 때 검기 애니메이션이 나오지 않는 것이 오히려 올바른 동작이다.
 
+### 무기별 공격 이펙트 시스템
+
+버그 수정 과정에서 `wpType===''` 분기를 추가하면서, 해당 분기에 공격 이펙트가 전혀 없다는 점도 함께 발견했다. orb 폴백이 그대로 파이어볼을 쏘고 있었다.
+
+네 가지 무기 타입에 각각 이펙트를 설계했다.
+
+| 무기 타입 | 발사체 | 충격 링 색상 |
+| --------- | ------ | ----------- |
+| sword     | 검기 슬래시 (기존) | — |
+| bow       | ➤ 각도 회전 화살 | 파란색 |
+| orb       | 파이어볼 CSS div | 빨간색 |
+| 미착용    | 👊 주먹 이모지 | 황금색 |
+
+필드 모드에서는 `S.playerX/Y` → `te.x/y` 좌표 transition으로 발사체가 실제 적을 향해 날아간다. bow는 `Math.atan2(dy,dx)*180/Math.PI`로 각도를 계산해 ➤ 이모지를 회전시켰다. 보스 모드에서는 기존 `left:90px → 300px` 슬라이딩 패턴을 그대로 활용했다.
+
+링 충격파는 `showRingImpact(x,y,bColor,fColor)` 공용 함수 하나로 통합했다. 기존 `showPunchImpact`도 내부적으로 이 함수를 호출하도록 리팩터했다. 인라인 스타일로 색상을 주입하고, CSS keyframe `punchImpact`/`punchImpact2`를 모든 링이 공유한다. 링 크기는 요청에 따라 10% 축소(42px→38px, 26px→23px) 적용했다.
+
 ---
 
 ## 2026-04-24 — D7 던전 + SD 치비 캐릭터 시스템 + 근거리 버그 수정
