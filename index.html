@@ -204,6 +204,11 @@ body { background:#0a0a0a; display:flex; justify-content:center; align-items:cen
 .slash-fx2 { position:absolute; pointer-events:none; z-index:15; width:42px; height:4px; background:linear-gradient(90deg,transparent,rgba(255,255,255,.9),transparent); border-radius:3px; transform:translate(-50%,-50%); animation:slashFx2 .32s ease-out forwards; }
 @keyframes slashFx  { 0%{opacity:1;transform:translate(-50%,-50%) scale(.2) rotate(-50deg)} 45%{opacity:1;transform:translate(-50%,-50%) scale(1.15) rotate(25deg)} 100%{opacity:0;transform:translate(-50%,-50%) scale(.7) rotate(40deg)} }
 @keyframes slashFx2 { 0%{opacity:0;transform:translate(-50%,-50%) scale(.2) rotate(50deg)} 30%{opacity:1;transform:translate(-50%,-50%) scale(1) rotate(-20deg)} 100%{opacity:0;transform:translate(-50%,-50%) scale(.7) rotate(-35deg)} }
+.proj-fist { font-size:20px; top:50%; margin-top:-10px; filter:drop-shadow(0 0 5px rgba(255,210,60,.9)); }
+.punch-impact  { position:absolute; pointer-events:none; z-index:15; width:42px; height:42px; border-radius:50%; border:3px solid rgba(255,215,60,1); transform:translate(-50%,-50%); animation:punchImpact .38s ease-out forwards; }
+.punch-impact2 { position:absolute; pointer-events:none; z-index:15; width:26px; height:26px; border-radius:50%; background:radial-gradient(circle,rgba(255,240,100,.85),transparent); transform:translate(-50%,-50%); animation:punchImpact2 .30s ease-out forwards; }
+@keyframes punchImpact  { 0%{opacity:1;transform:translate(-50%,-50%) scale(.15);} 55%{opacity:.9;transform:translate(-50%,-50%) scale(1.3);} 100%{opacity:0;transform:translate(-50%,-50%) scale(1.85);} }
+@keyframes punchImpact2 { 0%{opacity:1;transform:translate(-50%,-50%) scale(.3);} 100%{opacity:0;transform:translate(-50%,-50%) scale(2.1);} }
 .battle-log { flex:1; min-height:0; background:#080305; border-top:1px solid var(--border); overflow-y:auto; padding:7px 12px; font-size:11px; line-height:1.75; }
 .battle-log::-webkit-scrollbar { width:2px; }
 .la{color:#e8c87a;} .ls{color:var(--purple);} .lp{color:var(--blue);} .lr{color:var(--green);} .ll{color:var(--dim);}
@@ -2053,6 +2058,13 @@ function showSlashEffect(x,y){
   arena.appendChild(s1);arena.appendChild(s2);
   setTimeout(()=>{s1.remove();s2.remove();},340);
 }
+function showPunchImpact(x,y){
+  const arena=document.getElementById('battle-arena');if(!arena)return;
+  const p1=document.createElement('div');p1.className='punch-impact';p1.style.cssText=`left:${x}px;top:${y}px;`;
+  const p2=document.createElement('div');p2.className='punch-impact2';p2.style.cssText=`left:${x}px;top:${y}px;`;
+  arena.appendChild(p1);arena.appendChild(p2);
+  setTimeout(()=>{p1.remove();p2.remove();},420);
+}
 function enemyAtkAnim(idx){
   const sp=document.getElementById('esp'+idx);if(!sp)return;
   sp.classList.add('atk');setTimeout(()=>sp.classList.remove('atk'),280);
@@ -2064,6 +2076,20 @@ function doAttackAnim(onHit,targetIdx){
     if(getWpType()==='sword'){
       const te=S.enemies[targetIdx];
       if(te&&te.hp>0)setTimeout(()=>showSlashEffect(te.x,te.y),100);
+    }else if(getWpType()===''){
+      const te=S.enemies[targetIdx];
+      if(te&&te.hp>0){
+        const arena=document.getElementById('battle-arena');
+        if(arena){
+          const fist=document.createElement('div');
+          fist.style.cssText=`position:absolute;pointer-events:none;font-size:20px;z-index:15;filter:drop-shadow(0 0 5px rgba(255,210,60,.9));transition:left .20s linear,top .20s linear,opacity .20s;left:${S.playerX}px;top:${S.playerY}px;transform:translate(-50%,-50%);`;
+          fist.textContent='👊';
+          arena.appendChild(fist);
+          setTimeout(()=>{fist.style.left=te.x+'px';fist.style.top=te.y+'px';},20);
+          setTimeout(()=>{fist.style.opacity='0';showPunchImpact(te.x,te.y);},230);
+          setTimeout(()=>{if(fist.parentNode)fist.parentNode.removeChild(fist);},430);
+        }
+      }
     }
     setTimeout(()=>{hitEffect(targetIdx);onHit();},130);
     return;
@@ -2082,10 +2108,19 @@ function doAttackAnim(onHit,targetIdx){
     const proj=document.createElement('div');proj.className='proj proj-arrow';proj.textContent='➤';proj.style.cssText='left:90px;';
     arena.appendChild(proj);setTimeout(()=>{proj.style.left='310px';proj.style.opacity='0';},20);
     setTimeout(()=>{if(proj.parentNode)proj.parentNode.removeChild(proj);hitEffect(targetIdx);onHit();},360);
-  }else{
+  }else if(wpType==='orb'){
     const proj=document.createElement('div');proj.className='proj proj-fire';proj.style.cssText='left:90px;';
     arena.appendChild(proj);setTimeout(()=>{proj.style.left='300px';proj.style.opacity='0';},20);
     setTimeout(()=>{if(proj.parentNode)proj.parentNode.removeChild(proj);hitEffect(targetIdx);onHit();},370);
+  }else{
+    const proj=document.createElement('div');proj.className='proj proj-fist';proj.textContent='👊';proj.style.cssText='left:90px;';
+    arena.appendChild(proj);setTimeout(()=>{proj.style.left='295px';proj.style.opacity='0';},20);
+    setTimeout(()=>{
+      if(proj.parentNode)proj.parentNode.removeChild(proj);
+      const tEl=document.getElementById('en'+targetIdx)||document.getElementById('ae'+targetIdx);
+      if(tEl){const r=tEl.getBoundingClientRect(),ar=arena.getBoundingClientRect();showPunchImpact(r.left-ar.left+r.width/2,r.top-ar.top+r.height/2);}
+      hitEffect(targetIdx);onHit();
+    },350);
   }
 }
 
