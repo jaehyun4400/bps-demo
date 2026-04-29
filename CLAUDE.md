@@ -27,12 +27,12 @@
 
 | 구분 | 경로 |
 |------|------|
-| 메인 작업 파일 (WSL) | `/home/jhpark/claude/study/bps/index.html` |
-| Windows Cursor 파일 | `c:\Users\jh_pa\Cursor\test\index.html` |
+| 메인 작업 파일 | `index.html` (프로젝트 루트) |
 | 초상화 이미지 | `portraits_unified/` (gungny.png / choisg.png / gungny2.png / hye.png) |
 | SD 치비 캐릭터 | `sd_chars/` (sword_girl.png / bow_girl.png / mage_girl.png / normal_girl.png) |
+| 작업 가이드 | `CLAUDE.md` (본 파일) |
 
-> WSL과 Windows Cursor 파일은 별도 세션에서 작업되므로 수동 병합 필요
+> WSL(Claude Code)과 Windows Cursor 환경 파일은 별도로 관리되므로 수동 병합 필요
 
 ---
 
@@ -64,7 +64,7 @@
 | 혜 귀인 | SSR | HP 60% 이하 시 보호막 발동 (locked, 소환 필요) |
 
 ### 던전 구조
-- D1~D4, D6: 10스테이지 (1~(N-1) 일반, N 보스)
+- D1-D4, D6: 10스테이지 (1-(N-1) 일반, N 보스)
 - D5, D7: 30스테이지 (`stageCount:30, sections` 구조)
 - 필드 모드: 보스 스테이지 제외 전부 (`isFieldMode = !isBossStage`)
 
