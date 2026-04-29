@@ -1074,7 +1074,7 @@ const UPGRADE_DEFS = [
 ];
 
 const WEAPONS = [
-  { id:'hwassi',  name:'화씨벽',    grade:'SSR', type:'orb',   emoji:'🔮', atk:180, effect:'범위 공격 +25%\n(파이어볼)' },
+  { id:'hwassi',  name:'화씨벽',    grade:'SSR', type:'orb',   emoji:'🔮', atk:180, splashAll:0.15, effect:'전체 공격 15%\n(파이어볼)' },
   { id:'yongrin', name:'용린검',    grade:'SR',  type:'sword', emoji:'⚔️',  atk:140, lifeSteal:0.15, effect:'흡혈 +15%\n(근접 돌격)' },
   { id:'baekwoo', name:'백우궁',    grade:'R',   type:'bow',   emoji:'🏹',  atk:100, critBonus:0.20, effect:'치명타 확률+20%\n(원거리 화살)' },
   // 던전 5 드랍 무기
@@ -2277,11 +2277,11 @@ function doTick(){
     updateEnemyHp(ti);showDmgFloat(ti,dmg,isCrit);
     addLog('la',`${isCrit?'💥 치명타! ':''}${ch.name} → ${target.name} ${dmg} 피해`);
 
-    // AoE (orb)
-    if(wp&&wp.type==='orb'&&S.enemies.filter(e=>e.hp>0).length>1){
-      const splash=Math.round(dmg*0.35);
+    // 화씨벽 전용 전체 스플래시
+    if(wp&&wp.splashAll&&S.enemies.filter(e=>e.hp>0).length>1){
+      const splash=Math.round(dmg*wp.splashAll);
       S.enemies.forEach((e,i)=>{if(e!==target&&e.hp>0){e.hp=Math.max(0,e.hp-splash);updateEnemyHp(i);showDmgFloat(i,splash,false);}});
-      addLog('ls',`🔮 파이어볼 범위 피해 ${splash}`);
+      addLog('ls',`🔮 화씨벽 전체 피해 ${splash}`);
     }
     // 흡혈
     const lifeSteal=(wp&&wp.lifeSteal)||0;
