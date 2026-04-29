@@ -1259,7 +1259,7 @@ const S = {
   dungeon:0, stage:0,
   running:false, fast:false, repeatFarm:false, repeatCount:0, autoDive:false,
   timer:null, enemies:[], playerHp:0, playerMaxHp:0,
-  shield:false, passiveTriggered:false,
+  shield:0, shieldCooldownEnd:0,
   stageKills:0, evShown:false,
   exStocks:{e1:3,e2:5,e3:10,e4:1},
   items:{enhStone:0, expPotion:0, awaken:0},
@@ -1902,7 +1902,7 @@ function initBattle(){
   clearLog();
   const st=getCharStats(S.char);
   S.playerMaxHp=st.maxHp;S.playerHp=st.maxHp;
-  S.shield=false;S.passiveTriggered=false;
+  S.shield=0;S.shieldCooldownEnd=0;
   spawnEnemies();
   if(isFieldMode()){
     initFieldUI(isBoss);
@@ -1975,16 +1975,17 @@ function spawnOneFieldEnemy(){
 }
 function renderPlayer(){
   const ch=getChar();
+  const shieldTxt=S.shield>0?` 🛡️ ${Math.round(S.shield/S.playerMaxHp*100)}%`:(S.shieldCooldownEnd>0?' ⏳':'');
   if(isFieldMode()){
     renderHpOrb();
-    const nm=document.getElementById('field-char-nm');if(nm)nm.textContent=ch.name+(S.shield?' 🛡️':'');
+    const nm=document.getElementById('field-char-nm');if(nm)nm.textContent=ch.name+shieldTxt;
   } else {
     const sp=document.getElementById('ap-sprite');
     if(sp&&!document.getElementById('boss-sd-wrap')){
       const _ac='field-sd-aura-'+ch.grade;
       sp.innerHTML=`<div class="field-sd-wrap ${_ac} boss-sd-wrap" id="boss-sd-wrap"><img class="field-sd-img" id="boss-sd-img" src="${getSDCharImg(getWpType())}"></div>`;
     }
-    document.getElementById('ap-name').textContent=ch.name+(S.shield?' 🛡️':'');
+    document.getElementById('ap-name').textContent=ch.name+shieldTxt;
     const pct=Math.max(0,S.playerHp/S.playerMaxHp*100);
     const bar=document.getElementById('ap-hp-fill');
     bar.style.width=pct+'%';bar.className='ap-hp-fill'+(pct<30?' low':'');
@@ -2112,9 +2113,39 @@ function updateRepeatBtn(){
   btn.textContent=S.repeatFarm?'🔄 반복중':'🔄 반복';
   btn.classList.toggle('on',S.repeatFarm);
 }
+function checkShieldPassive(){
+  const ch=getChar();
+  if(ch.passiveTrigger!=='hp60')return;
+  const now=Date.now();
+  if(S.shield>0)return;
+  if(S.shieldCooldownEnd>0){
+    if(now<S.shieldCooldownEnd)return;
+    S.shieldCooldownEnd=0;
+  }
+  if(S.playerHp/S.playerMaxHp<=0.6){
+    S.shield=Math.round(S.playerMaxHp*0.15);
+    addLog('lp',`🛡️ 혜 귀인 패시브 발동! 보호막 ${S.shield} 생성`);
+    renderPlayer();
+  }
+}
+
+function applyShieldAbsorb(dmg){
+  if(S.shield<=0)return dmg;
+  const absorbed=Math.min(S.shield,dmg);
+  S.shield=Math.max(0,S.shield-absorbed);
+  if(S.shield===0){
+    S.shieldCooldownEnd=Date.now()+20000;
+    addLog('lp','🛡️ 보호막 소진 — 20초 후 재발동 대기');
+  } else {
+    addLog('lp',`🛡️ 보호막 ${absorbed} 흡수! (잔여: ${S.shield})`);
+  }
+  return dmg-absorbed;
+}
+
 function tick(){if(!S.running)return;const spd=1+Math.min(0.8,getAtkSpeedBonus());const delay=Math.round((S.fast?500:1000)/spd);S.timer=setTimeout(()=>{doTick();if(S.running)tick();},delay);}
 
 function doTick(){
+  checkShieldPassive();
   const ch=getChar();const st=getCharStats(S.char);
   const alive=S.enemies.filter(e=>e.hp>0);
   if(alive.length===0||S.playerHp<=0)return;
@@ -2137,9 +2168,10 @@ function doTick(){
         const atk=reachable[Math.floor(Math.random()*reachable.length)],ai=S.enemies.indexOf(atk);
         enemyAtkAnim(ai);
         setTimeout(()=>{
-          if(S.shield){addLog('lp','🛡️ 보호막이 데미지를 흡수!');S.shield=false;renderPlayer();return;}
           if(Math.random()<st.eva){addLog('lp',`💨 ${ch.name} 회피!`);showPlayerMiss();return;}
-          const actualDmg=Math.max(1,Math.round(atk.atk*(1-Math.min(0.8,st.def/(st.def+200)))));
+          const rawDmg=Math.max(1,Math.round(atk.atk*(1-Math.min(0.8,st.def/(st.def+200)))));
+          const actualDmg=applyShieldAbsorb(rawDmg);
+          if(actualDmg<=0){renderPlayer();return;}
           S.playerHp=Math.max(0,S.playerHp-actualDmg);
           showPlayerDmgFloat(actualDmg);
           addLog('ll',`${atk.emoji}${atk.name} → ${ch.name} ${actualDmg} 피해`);
@@ -2184,10 +2216,6 @@ function doTick(){
     }
     // 최상궁 패시브
     if(ch.passiveTrigger==='gold'&&target.hp<=0){S.gold+=Math.round(target.gold*4*0.3);updateCur();}
-    // 혜 귀인 패시브
-    if(ch.passiveTrigger==='hp60'&&!S.passiveTriggered&&S.playerHp/S.playerMaxHp<=0.6){
-      S.passiveTriggered=true;S.shield=true;addLog('lp','🛡️ 혜 귀인 패시브 발동! 보호막 생성');
-    }
     // 적 사망
     if(target.hp<=0){
       addLog('lr',`💀 ${target.name} 처치! +${target.gold*4}💰`);
@@ -2215,11 +2243,12 @@ function doTick(){
     const atk=reachable[Math.floor(Math.random()*reachable.length)],ai=S.enemies.indexOf(atk);
     enemyAtkAnim(ai);
     setTimeout(()=>{
-      if(S.shield){addLog('lp','🛡️ 보호막이 데미지를 흡수!');S.shield=false;renderPlayer();return;}
       // 회피 판정
       if(Math.random()<st.eva){addLog('lp',`💨 ${ch.name} 회피!`);showPlayerMiss();return;}
-      // 방어력 감소 (최대 80%)
-      const actualDmg=Math.max(1,Math.round(atk.atk*(1-Math.min(0.8,st.def/(st.def+200)))));
+      // 방어력 감소 (최대 80%), 보호막 흡수
+      const rawDmg=Math.max(1,Math.round(atk.atk*(1-Math.min(0.8,st.def/(st.def+200)))));
+      const actualDmg=applyShieldAbsorb(rawDmg);
+      if(actualDmg<=0){renderPlayer();return;}
       S.playerHp=Math.max(0,S.playerHp-actualDmg);
       showPlayerDmgFloat(actualDmg);
       addLog('ll',`${atk.emoji}${atk.name} → ${ch.name} ${actualDmg} 피해`);
@@ -2374,7 +2403,7 @@ function advanceBattleStage(){
   spawnEnemies();
   const st=getCharStats(S.char);
   S.playerHp=Math.min(S.playerMaxHp,S.playerHp+Math.round(st.maxHp*0.3));
-  S.shield=false;S.passiveTriggered=false;S.stageKills=0;
+  S.shield=0;S.shieldCooldownEnd=0;S.stageKills=0;
   const label=stageLabel(S.dungeon,S.stage),isBoss=isBossStage(S.dungeon,S.stage);
   document.getElementById('battle-top-label').textContent='⚔️ '+label;
   if(isFieldMode()){
@@ -2657,7 +2686,7 @@ function updateSDChar(){
     ['R','SR','SSR'].forEach(g=>bwrap.classList.remove('field-sd-aura-'+g));
     bwrap.classList.add('field-sd-aura-'+ch.grade);
     const apnm=document.getElementById('ap-name');
-    if(apnm)apnm.textContent=ch.name+(S.shield?' 🛡️':'');
+    if(apnm){const _st=S.shield>0?` 🛡️ ${Math.round(S.shield/S.playerMaxHp*100)}%`:(S.shieldCooldownEnd>0?' ⏳':'');apnm.textContent=ch.name+_st;}
   }
 }
 function updateSDFlip(){
