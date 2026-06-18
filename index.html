@@ -1477,7 +1477,7 @@ function goScreen(name){
   }
   if(name==='event')    updateEventScreen();
   if(name==='items')    renderItemsScreen();
-  if(name==='lobby')    { updateLobby(); saveGame(); }
+  if(name==='lobby')    { updateCP(); updateLobby(); saveGame(); }
   if(name==='login')    { renderLoginSaves(); }
   if(name==='achieve')  { renderAchieveScreen(); updateCur(); }
   if(name==='mail')     { renderMailScreen(); updateMailBadge(); }
@@ -1553,7 +1553,6 @@ function updateLobby(){
   const en=document.getElementById('lb-cname');if(en)en.textContent=c.name;
   const nl=document.getElementById('lobby-nick-lbl');if(nl)nl.textContent=currentNick?`[${currentNick}]`:``;
   const sl=document.getElementById('lb-stage-label');if(sl)sl.textContent='🗺️ '+stageLabel(S.dungeon,S.stage);
-  updateCP();
 }
 
 // ─── DUNGEON SELECT ───
@@ -1668,7 +1667,9 @@ function renderCostumeGrid(){
     div.innerHTML=`<div class="ec-sp">${cs.emoji}</div><div class="ec-nm">${owned?cs.name:cs.name+' 🔒'}</div><div class="ec-ef">${cs.effect}</div>${extras}<div class="ec-eq" style="color:${eq?'var(--gold)':owned?'var(--dim)':'var(--border)'}">${eq?'✓ 착용중':owned?'착용하기':'미획득'}</div>`;
     div.onclick=()=>{
       if(!owned){showToast('🌲 던전5에서 드랍으로 획득하세요!');return;}
-      S.costume=eq?null:cs.id;renderCostumeGrid();renderLineupHeader();updateCP();updateLobby();
+      S.costume=eq?null:cs.id;renderCostumeGrid();renderLineupHeader();
+      if(cs.id!=='daerye')updateCP();
+      updateLobby();
       if(cs.id!=='daerye'){const sg=document.getElementById('stat-grid');if(sg&&sg.style.display!=='none')renderStatPanel();}
       showToast(eq?'해제했습니다':cs.name+' 착용!');
     };
