@@ -1669,7 +1669,7 @@ function renderCostumeGrid(){
     div.onclick=()=>{
       if(!owned){showToast('🌲 던전5에서 드랍으로 획득하세요!');return;}
       S.costume=eq?null:cs.id;renderCostumeGrid();renderLineupHeader();updateCP();updateLobby();
-      const sg=document.getElementById('stat-grid');if(sg&&sg.style.display!=='none')renderStatPanel();
+      if(cs.id!=='daerye'){const sg=document.getElementById('stat-grid');if(sg&&sg.style.display!=='none')renderStatPanel();}
       showToast(eq?'해제했습니다':cs.name+' 착용!');
     };
     c.appendChild(div);
