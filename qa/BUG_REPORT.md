@@ -140,6 +140,6 @@
 
 | 파일 | 설명 |
 |---|---|
-| `attachments/BUG-002_before.png` | 의복 탭 진입 직후 — 대례복 미착용, 전투력 458 |
-| `attachments/BUG-002_during.png` | 대례복 착용 직후 — '착용중' 표시이나 전투력 여전히 458 (버그) |
-| `attachments/BUG-002_after.png`  | 로비 재진입 후 편성 복귀 — 전투력 538로 정상 갱신 |
+| `attachments/BUG-002_1_before_equip.png` | 의복 탭 진입 직후 — 대례복 미착용, 전투력 458 |
+| `attachments/BUG-002_2_after_equip.png`  | 대례복 착용 직후 — '착용중' 표시이나 전투력 여전히 458 (버그) |
+| `attachments/BUG-002_3_reentry.png`      | 로비 재진입 후 편성 복귀 — 전투력 538로 정상 갱신 |
