@@ -537,7 +537,7 @@ body { background:#0a0a0a; display:flex; justify-content:center; align-items:cen
     <div class="login-logo-area">
       <div class="t-en">BLADES OF PLUMFLOWER BENEATH SNOW</div>
       <div class="t-logo">BPS</div>
-      <div class="t-kr">매화도지하설</div>
+      <div class="t-kr">설중매화검</div>
       <div style="font-size:42px;margin:10px 0;animation:flt 3s ease-in-out infinite;">🌸</div>
     </div>
     <div class="login-card">
@@ -558,7 +558,7 @@ body { background:#0a0a0a; display:flex; justify-content:center; align-items:cen
   <div class="t-content">
     <div class="t-en">BLADES OF PLUMFLOWER BENEATH SNOW</div>
     <div class="t-logo">BPS</div>
-    <div class="t-kr">매화도지하설</div>
+    <div class="t-kr">설중매화검</div>
     <div class="t-flower">🌸</div>
     <div class="t-tap">▶ 터치하여 시작</div>
     <div class="t-ver">v1.3.0 · 신나는 여름방학!! 🌴🏖️</div>
@@ -3221,10 +3221,10 @@ const SYSTEM_MAILS = [
     body:'v1.17 업데이트를 기념하여 보상을 드립니다. 앞으로도 BPS를 사랑해 주세요!',
     rewards:[{type:'diamond',amount:10000},{type:'gold',amount:10000000}], date:'2026.04.24', expires:'2026.05.24' },
   { id:'mail_update_v130_notice', from:'운영팀', title:'v1.3.0 업데이트 안내 — 신나는 여름방학!! 🌴🏖️',
-    body:'안녕하세요, 매화도지하설 운영팀입니다.\nv1.3.0 업데이트로 \'신나는 여름방학!!\' 시즌이 시작되었습니다.\n로비 우측 상단의 📅 출석 아이콘을 눌러 매일 출석 보상을 확인해 보세요.\n7일간 누적 출석 시 골드와 다이아 등 다양한 보상을 받으실 수 있습니다.\n앞으로도 더 즐거운 BPS가 되도록 노력하겠습니다. 감사합니다.',
+    body:'안녕하세요, 설중매화검 운영팀입니다.\nv1.3.0 업데이트로 \'신나는 여름방학!!\' 시즌이 시작되었습니다.\n로비 우측 상단의 📅 출석 아이콘을 눌러 매일 출석 보상을 확인해 보세요.\n7일간 누적 출석 시 골드와 다이아 등 다양한 보상을 받으실 수 있습니다.\n앞으로도 더 즐거운 BPS가 되도록 노력하겠습니다. 감사합니다.',
     rewards:[], date:'2026.06.19', expires:'2026.07.19' },
   { id:'mail_update_v130_patch', from:'운영팀', title:'v1.3.0 업데이트 완료 안내',
-    body:'안녕하세요, 매화도지하설 운영팀입니다.\nv1.3.0 업데이트가 완료되었습니다. 점검 시간 동안 불편을 드려 죄송합니다.\n점검 보상을 드리니 확인해 주세요. 항상 응원해 주셔서 감사합니다.',
+    body:'안녕하세요, 설중매화검 운영팀입니다.\nv1.3.0 업데이트가 완료되었습니다. 점검 시간 동안 불편을 드려 죄송합니다.\n점검 보상을 드리니 확인해 주세요. 항상 응원해 주셔서 감사합니다.',
     rewards:[{type:'diamond',amount:3000},{type:'gold',amount:1500000}], date:'2026.06.19', expires:'2026.07.19' },
 ];
 
@@ -3233,7 +3233,7 @@ function injectSystemMails(isNew){
     const now=new Date();
     const exp=new Date(now); exp.setDate(exp.getDate()+7); exp.setHours(23,59,59,0);
     const welcome={ id:'mail_welcome', from:'운영팀', title:'BPS에 오신 것을 환영합니다!',
-      body:'매화도지하설 세계에 오신 것을 환영합니다. 즐거운 모험이 되시길 바랍니다!',
+      body:'설중매화검 세계에 오신 것을 환영합니다. 즐거운 모험이 되시길 바랍니다!',
       rewards:[], date:fmtMailDate(now), expires:fmtMailDate(exp) };
     if(!S.mails.find(m=>m.id==='mail_welcome')) S.mails.unshift(welcome);
   }
