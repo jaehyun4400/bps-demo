@@ -1,7 +1,7 @@
 # 출석 이벤트 보상 수령 가이드
 
 **대상**: 여름방학맞이 7days 특별 출석이벤트 (v1.3.0)
-**용도**: QA 테스트 / 데모 시연 시 Day별 보상 수령 및 BUG-003 재현 방법 정리
+**용도**: QA 테스트 / 데모 시연 시 Day별 보상 수령 및 BUG-001(v1.3.0) 재현 방법 정리
 **작성일**: 2026-06-19
 
 ---
@@ -66,9 +66,9 @@ renderCheckIn();
 
 ---
 
-## 5. BUG-003 재현 방법 (사이클 리셋 불가)
+## 5. BUG-001 재현 방법 (사이클 리셋 불가)
 
-> 상세 리포트: `qa/BUG_REPORT.md` 의 BUG-003 (연결 TC-016)
+> 상세 리포트: `qa/1.3/BUG_REPORT.md` 의 BUG-001 (연결 TC-001)
 
 브라우저 콘솔(F12)에서:
 
@@ -103,5 +103,5 @@ S.lastCheckIn = '2000-01-01'; renderCheckIn();
 | `S.lastCheckIn` | 마지막 수령 날짜 'YYYY-MM-DD', 영속 저장 |
 | `canCheckInToday()` | 오늘 수령 가능 여부 |
 | `openCheckIn()` / `renderCheckIn()` | 팝업 열기 / 그리드·버튼 렌더 |
-| `claimCheckIn()` | 오늘 보상 수령 (⚠ BUG-003 리셋 누락 지점) |
+| `claimCheckIn()` | 오늘 보상 수령 (⚠ BUG-001[v1.3.0] 리셋 누락 지점) |
 | `updateCheckInBadge()` | 원형 아이콘 미수령 뱃지 표시/숨김 |

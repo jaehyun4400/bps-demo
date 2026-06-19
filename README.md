@@ -23,25 +23,22 @@
 
 ## QA 산출물
 
-v1.2.0 · v1.3.0 업데이트를 대상으로 작성된 QA 문서입니다. **계획·보고서는 릴리스 단위로 분리**하고, **테스트 케이스·추적성은 누적 자산**으로 통합 관리합니다.
+v1.2.0 · v1.3.0 업데이트를 대상으로 작성된 QA 문서입니다. **버전별로 `qa/1.2/`, `qa/1.3/` 폴더에 완전 분리**하여 관리합니다 (각 폴더 내 TC/Bug ID는 폴더 단독 번호 체계 — 버전 간 동일 번호가 다른 항목을 가리킬 수 있으니 폴더 경로로 구분).
 
-| 문서 | 설명 |
+| 버전 | 문서 |
 |---|---|
-| [TEST_PLAN.md](./qa/TEST_PLAN.md) · [TEST_PLAN_v1.3.0.md](./qa/TEST_PLAN_v1.3.0.md) | 테스트 계획서 (v1.2.0 / v1.3.0) — 범위, 전략, 환경, 일정, 리스크 |
-| [TEST_CASES.md](./qa/TEST_CASES.md) | 테스트 케이스 **51개** (누적) — 경계값/기능/회귀/비기능 |
-| [BUG_REPORT.md](./qa/BUG_REPORT.md) | 버그 리포트 — BUG-001~004 (Critical 1 / Major 3) |
-| [TRACEABILITY.md](./qa/TRACEABILITY.md) | 추적성 매트릭스 (누적) — 요구사항 → TC 매핑 |
-| [TEST_REPORT.md](./qa/TEST_REPORT.md) · [TEST_REPORT_v1.3.0.md](./qa/TEST_REPORT_v1.3.0.md) | 테스트 완료 보고서 (v1.2.0 / v1.3.0) — 결과 요약, 출시 권고 |
+| **v1.2.0** | [TEST_PLAN](./qa/1.2/TEST_PLAN.md) · [TEST_CASES](./qa/1.2/TEST_CASES.md) (38개) · [BUG_REPORT](./qa/1.2/BUG_REPORT.md) (BUG-001~002) · [TRACEABILITY](./qa/1.2/TRACEABILITY.md) · [TEST_REPORT](./qa/1.2/TEST_REPORT.md) |
+| **v1.3.0** | [TEST_PLAN](./qa/1.3/TEST_PLAN.md) · [TEST_CASES](./qa/1.3/TEST_CASES.md) (13개) · [BUG_REPORT](./qa/1.3/BUG_REPORT.md) (BUG-001~002) · [TRACEABILITY](./qa/1.3/TRACEABILITY.md) · [TEST_REPORT](./qa/1.3/TEST_REPORT.md) |
 
 ### 테스트 결과 요약
 
-| 항목 | v1.2.0 | v1.3.0 |
+| 항목 | v1.2.0 (`qa/1.2/`) | v1.3.0 (`qa/1.3/`) |
 |---|---|---|
-| 총 TC | 38 | 13 (누적 51) |
+| 총 TC | 38 | 13 |
 | PASS | 36 (94.7%) | 11 (84.6%) |
 | FAIL | 2 | 2 |
-| 미해결 결함 | BUG-001 Critical / BUG-002 Major | BUG-003 Major / BUG-004 Major |
-| 출시 권고 | **보류** (BUG-001 수정 후 재검증) | **보류** (BUG-003·004 수정 후 재검증) |
+| 미해결 결함 | BUG-001 Critical / BUG-002 Major | BUG-001 Major / BUG-002 Major |
+| 출시 권고 | **보류** (BUG-001 수정 후 재검증) | **보류** (BUG-001·002 수정 후 재검증) |
 
 ---
 

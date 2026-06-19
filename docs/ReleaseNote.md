@@ -22,9 +22,9 @@
 - 픽업 배너는 기존 소환 천장(`GACHA_PITY_CAP=50`)·확률 로직 공유, 결과 팝업 재사용
 
 ### 알려진 이슈 (출시 전 수정 필요)
-- **BUG-003 (Major)**: 출석 Day 7 수령 후 사이클이 리셋되지 않아 출석 버튼이 영구 비활성화됨 (연결 TC-039)
-- **BUG-004 (Major)**: 픽업 배너 10+1 소환 시 11회가 아닌 10회만 지급됨 (연결 TC-040)
-- 상세: `qa/BUG_REPORT.md` / 테스트 결과: `qa/TEST_REPORT_v1.3.0.md`
+- **BUG-001 (Major)**: 출석 Day 7 수령 후 사이클이 리셋되지 않아 출석 버튼이 영구 비활성화됨 (연결 TC-001)
+- **BUG-002 (Major)**: 픽업 배너 10+1 소환 시 11회가 아닌 10회만 지급됨 (연결 TC-009)
+- 상세: `qa/1.3/BUG_REPORT.md` / 테스트 결과: `qa/1.3/TEST_REPORT.md`
 
 ### 문서
 - QA 문서 세트 v1.3.0 반영 (TEST_PLAN_v1.3.0 / TEST_REPORT_v1.3.0 분리, TEST_CASES 51개 누적, TRACEABILITY·GAME_SPEC 갱신)

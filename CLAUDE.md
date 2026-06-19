@@ -120,7 +120,7 @@
 | 항목 | 내용 |
 |---|---|
 | 타이틀 | 🌸 여름방학맞이 7days 특별 출석이벤트 |
-| 사이클 | 7일 누적 (Day 7 완료 후 Day 1 재시작 — **단, BUG-003으로 리셋 미동작**) |
+| 사이클 | 7일 누적 (Day 7 완료 후 Day 1 재시작 — **단, BUG-001(qa/1.3)으로 리셋 미동작**) |
 | 출석 방식 | 누적 출석 — 하루 빠져도 이어서 진행 |
 | 수령 조건 | 날짜 기준 1일 1회 (`ciTodayStr() !== S.lastCheckIn`) |
 | 진입 경로 | ① 게임 접속(로비 진입) 시 자동 팝업(세션 1회) ② 로비 우측 상단 원형 아이콘 클릭 |
@@ -148,23 +148,23 @@ lastCheckIn: '',     // 마지막 수령 날짜 'YYYY-MM-DD'  (saveGame/applyDat
 - 수령 시: `CHECKIN_REWARDS[checkInDay]` 지급 → lastCheckIn=오늘 → checkInDay++
 - 정상 설계: Day 7 수령 후 checkInDay=0 리셋 → 다음 사이클 Day 1 재시작
 
-**의도적 버그 — BUG-003 (Major)** ✅ 데모 재현 확인
+**의도적 버그 — BUG-001 (Major, `qa/1.3/BUG_REPORT.md` 기준)** ✅ 데모 재현 확인
 - `claimCheckIn()` 내 `if(checkInDay>=7) checkInDay=0;` 리셋 라인 주석 처리(누락)
 - 결과: Day 7 수령 후 checkInDay=7 고착 → `checkInDay < CHECKIN_REWARDS.length` 조건 false
 - → 출석 버튼 **영구 비활성화**, 다음 사이클 진입 불가
-- 검증: 브라우저 7일 시뮬레이션 후 8일째 버튼 비활성 확인 (스크린샷 `qa/checkin_popup.png`, `qa/checkin_claimed.png`)
+- 검증: 브라우저 7일 시뮬레이션 후 8일째 버튼 비활성 확인 (스크린샷 `qa/1.3/attachments/`)
 
-**연결 TC (8개)**
+**연결 TC (8개, `qa/1.3/TEST_CASES.md` TC-001~008)**
 
 | 구분 | 시나리오 |
 |---|---|
 | 경계값 | Day 6 수령 후 Day 7 진입 확인 |
-| 경계값 | Day 7 수령 후 Day 1 사이클 리셋 확인 → **FAIL (BUG-003)** |
+| 경계값 | Day 7 수령 후 Day 1 사이클 리셋 확인 → **FAIL (BUG-001)** |
 | 기능 | 당일 수령 후 버튼 비활성화 (중복 방지) |
 | 기능 | 자정 이후 날짜 변경 시 수령 버튼 활성화 |
 | 기능 | 각 Day별 보상 정확성 확인 (Day 1~7) |
 | 기능 | 수령 완료 슬롯 dim+✔ 처리 확인 |
-| 기능 | 사이클 리셋 후 Day 1 보상 재지급 확인 → **FAIL (BUG-003)** |
+| 기능 | 사이클 리셋 후 Day 1 보상 재지급 확인 → **FAIL (BUG-001)** |
 | 회귀 | 출석 수령 후 기존 재화 정상 합산 확인 |
 
 ---
@@ -187,11 +187,11 @@ lastCheckIn: '',     // 마지막 수령 날짜 'YYYY-MM-DD'  (saveGame/applyDat
 - `BANNER` 상수: single/multi 소환 설정
 - `pullBanner(mode)`: 소환 실행 (pickup 플래그 항상 적용)
 
-**의도적 버그 — BUG-004 (Major)** ✅ 데모 재현 확인
+**의도적 버그 — BUG-002 (Major, `qa/1.3/BUG_REPORT.md` 기준)** ✅ 데모 재현 확인
 - `BANNER.multi.count`가 11이 아닌 **10**으로 설정 → "10+1 소환"인데 10회만 지급
 - 증상: 결과 카드 10장, 타이틀도 "소환 결과"(10+1 분기 미적용), 획득 합계 10개
-- 검증: 브라우저 10+1 소환 → 카드 10장 확인 (`qa/attachments/BUG-004_multi_10cards.png`)
-- 리포트: `qa/BUG_REPORT.md` BUG-004 (연결 TC-040)
+- 검증: 브라우저 10+1 소환 → 카드 10장 확인 (`qa/1.3/attachments/BUG-002_multi_10cards.png`)
+- 리포트: `qa/1.3/BUG_REPORT.md` BUG-002 (연결 TC-009)
 
 ---
 
@@ -211,9 +211,9 @@ lastCheckIn: '',     // 마지막 수령 날짜 'YYYY-MM-DD'  (saveGame/applyDat
 | `showPunchImpact(x,y)` | `showRingImpact` 황금색 래퍼 (미착용 전용) |
 | `openCheckIn()` | 출석 팝업 열기 (`renderCheckIn` 호출 후 ov-checkin active) |
 | `renderCheckIn()` | 7일 그리드 + 수령 버튼 상태 렌더 |
-| `claimCheckIn()` | 오늘 출석 보상 수령 (⚠ BUG-003 리셋 누락 지점) |
+| `claimCheckIn()` | 오늘 출석 보상 수령 (⚠ BUG-001[1.3] 리셋 누락 지점) |
 | `canCheckInToday()` / `ciTodayStr()` | 오늘 수령 가능 여부 / 'YYYY-MM-DD' 반환 |
 | `updateCheckInBadge()` | 원형 아이콘 미수령 뱃지 표시/숨김 |
 | `openBanner()` / `renderBanner()` | 픽업 배너 진입 / 천장·재화·일러스트 렌더 |
-| `pullBanner(mode)` | 픽업 소환 실행 (mode 1=1회, 10=10+1, ⚠ BUG-004 지점) |
+| `pullBanner(mode)` | 픽업 소환 실행 (mode 1=1회, 10=10+1, ⚠ BUG-002[1.3] 지점) |
 | `pullOne(opts)` | 단일 소환 추첨 (opts.pickup 시 SSR 3%, 천장 50) |
