@@ -107,7 +107,7 @@
 
 ### 진행 순서
 1. ✅ **A. 출석 체크 시스템** — 구현 완료 (2026-06-19)
-2. ⬜ **B. 혜귀인 픽업 배너** (신규 캐릭터 없음, 기존 혜귀인 활용) — 다음 작업
+2. ✅ **B. 혜귀인 픽업 배너** — 구현 완료 (2026-06-19)
 
 > 사용자가 "프리뷰" 라고 입력하면 아래 A 섹션 내용을 출력할 것.
 
@@ -169,6 +169,32 @@ lastCheckIn: '',     // 마지막 수령 날짜 'YYYY-MM-DD'  (saveGame/applyDat
 
 ---
 
+### B. 혜귀인 픽업 배너 — 구현 완료 (2026-06-19)
+
+**스펙 (사용자 확정)**
+
+| 항목 | 내용 |
+|---|---|
+| 형태 | 전용 배너 화면 (`screen-banner`) — 로비 우측 `🌸 픽업소환` 버튼으로 진입 |
+| 픽업 대상 | 혜 귀인 (SSR, 신규 캐릭터 없이 기존 캐릭터 활용) |
+| 확률 | SSR 1.5% → **3.0%** UP (`pullOne({pickup:true})`), SR 12%, R 나머지 |
+| 천장 | **50회 소환 시 혜 귀인 확정** (`GACHA_PITY_CAP=50`, 기존 유지) |
+| 소환 옵션 | 1회(💎200) / 10+1(💎1,800, SR 이상 보장) |
+| 결과 표시 | 기존 `ov-gacha` 팝업 + `showGachaResult()` 재사용 |
+
+**구성 요소**
+- 히어로 배너(혜 귀인 일러스트 + PICK UP), 확률 UP 박스, 천장 게이지(`pk-pity-fill`), 소환 버튼 2종
+- `BANNER` 상수: single/multi 소환 설정
+- `pullBanner(mode)`: 소환 실행 (pickup 플래그 항상 적용)
+
+**의도적 버그 — BUG-004 (Major)** ✅ 데모 재현 확인
+- `BANNER.multi.count`가 11이 아닌 **10**으로 설정 → "10+1 소환"인데 10회만 지급
+- 증상: 결과 카드 10장, 타이틀도 "소환 결과"(10+1 분기 미적용), 획득 합계 10개
+- 검증: 브라우저 10+1 소환 → 카드 10장 확인 (`qa/attachments/BUG-004_multi_10cards.png`)
+- 리포트: `qa/BUG_REPORT.md` BUG-004 (연결 TC-017)
+
+---
+
 ## 주요 JS 함수 위치 (index.html)
 
 | 함수 | 역할 |
@@ -188,3 +214,6 @@ lastCheckIn: '',     // 마지막 수령 날짜 'YYYY-MM-DD'  (saveGame/applyDat
 | `claimCheckIn()` | 오늘 출석 보상 수령 (⚠ BUG-003 리셋 누락 지점) |
 | `canCheckInToday()` / `ciTodayStr()` | 오늘 수령 가능 여부 / 'YYYY-MM-DD' 반환 |
 | `updateCheckInBadge()` | 원형 아이콘 미수령 뱃지 표시/숨김 |
+| `openBanner()` / `renderBanner()` | 픽업 배너 진입 / 천장·재화·일러스트 렌더 |
+| `pullBanner(mode)` | 픽업 소환 실행 (mode 1=1회, 10=10+1, ⚠ BUG-004 지점) |
+| `pullOne(opts)` | 단일 소환 추첨 (opts.pickup 시 SSR 3%, 천장 50) |

@@ -110,6 +110,34 @@ body { background:#0a0a0a; display:flex; justify-content:center; align-items:cen
 .ci-chk { position:absolute; top:2px; right:3px; font-size:10px; color:var(--gold-l); }
 .ci-claim-btn { width:100%; margin-top:14px; background:linear-gradient(180deg,var(--gold-l),var(--gold)); color:#120508; border:none; border-radius:10px; padding:11px; font-size:14px; font-weight:bold; cursor:pointer; }
 .ci-claim-btn:disabled { background:#2a1015; color:var(--dim); cursor:default; }
+/* 픽업 소환 진입 버튼 (로비) */
+.sdbtn.pickup { border-color:#f0a8d8; color:#f6c7e6; box-shadow:0 0 12px rgba(233,30,140,.35); }
+.sdbtn.pickup .si { animation:checkinPulse 2.2s ease-in-out infinite; }
+/* 픽업 배너 화면 */
+.pk-hero { position:relative; display:flex; gap:12px; padding:16px 14px; border-radius:12px; background:linear-gradient(135deg,#2a0838,#160838 55%,#08021e); border:1px solid var(--purple); overflow:hidden; }
+.pk-hero::before { content:'🌸'; position:absolute; right:-8px; bottom:-14px; font-size:90px; opacity:.08; }
+.pk-hero-art { flex-shrink:0; }
+.pk-hero-info { display:flex; flex-direction:column; justify-content:center; gap:3px; z-index:1; }
+.pk-hero-up { display:inline-block; align-self:flex-start; background:linear-gradient(90deg,#e91e8c,#ff7ac4); color:#fff; font-size:10px; font-weight:bold; letter-spacing:2px; padding:2px 8px; border-radius:10px; }
+.pk-hero-nm { color:#fff; font-size:19px; font-weight:bold; margin-top:2px; }
+.pk-ssr { color:#f59e0b; font-size:12px; vertical-align:middle; margin-left:3px; }
+.pk-hero-de { color:var(--pink-l); font-size:11px; white-space:pre-line; }
+.pk-hero-pe { color:var(--dim); font-size:10px; margin-top:4px; }
+.pk-box { margin-top:12px; background:rgba(8,4,16,.6); border:1px solid var(--bordg); border-radius:10px; padding:12px 14px; }
+.pk-box-ti { color:var(--gold); font-size:12px; font-weight:bold; margin-bottom:8px; }
+.pk-rate-row { display:flex; justify-content:space-between; font-size:12px; color:var(--text); padding:3px 0; }
+.pk-up { color:#ff7ac4; font-weight:bold; }
+.pk-pity-la { font-size:12px; color:var(--text); margin-bottom:7px; }
+.pk-pity-la b { color:#f59e0b; font-size:15px; }
+.pk-pity-bar { height:8px; background:#1a0c20; border-radius:4px; overflow:hidden; }
+.pk-pity-bar .f { height:100%; background:linear-gradient(90deg,#9c0049,#f59e0b); border-radius:4px; transition:width .4s; }
+.pk-btns { display:flex; gap:10px; margin-top:16px; }
+.pk-pull-btn { position:relative; flex:1; background:linear-gradient(180deg,#3a1050,#1e0838); border:1px solid var(--purple); border-radius:12px; padding:14px 8px; color:#fff; cursor:pointer; text-align:center; }
+.pk-pull-btn.feat { background:linear-gradient(180deg,#7a1048,#3a0828); border-color:#e91e8c; }
+.pk-pull-btn:active { transform:scale(.96); }
+.pk-pull-nm { font-size:14px; font-weight:bold; }
+.pk-pull-co { font-size:12px; color:var(--gold-l); margin-top:4px; }
+.pk-pull-badge { position:absolute; top:-8px; right:50%; transform:translateX(50%); background:#e91e8c; color:#fff; font-size:9px; font-weight:bold; padding:1px 7px; border-radius:8px; white-space:nowrap; }
 .redeem-input { width:100%; background:#0a0305; border:1px solid var(--bordg); border-radius:6px; padding:10px 12px; color:var(--gold-l); font-size:15px; text-align:center; letter-spacing:3px; text-transform:uppercase; outline:none; margin:8px 0; }
 .redeem-input::placeholder { color:var(--dim); letter-spacing:1px; font-size:12px; text-transform:none; }
 .redeem-input:focus { border-color:var(--gold); }
@@ -555,6 +583,7 @@ body { background:#0a0a0a; display:flex; justify-content:center; align-items:cen
     <div class="lb-cp">전투력 <span id="lb-cp-val" style="color:var(--gold-l);font-weight:bold;">0</span></div>
     <div class="lb-stage" id="lb-stage-label">🗺️ 던전을 선택하세요</div>
     <div class="lb-sides">
+      <div class="sdbtn pickup" onclick="openBanner()"><div class="si">🌸</div><div>픽업소환</div></div>
       <div class="sdbtn new" onclick="showEvPopup()"><div class="si">💕</div><div>이벤트</div></div>
       <div class="sdbtn" onclick="goScreen('lineup')"><div class="si">👤</div><div>편성</div></div>
       <div class="sdbtn" onclick="goScreen('shop')"><div class="si">🛍️</div><div>상점</div></div>
@@ -750,6 +779,50 @@ body { background:#0a0a0a; display:flex; justify-content:center; align-items:cen
     <button class="nbtn" onclick="goScreen('lineup')"><div class="ni">👤</div>편성</button>
     <button class="nbtn" onclick="goScreen('event')"><div class="ni">💕</div>이벤트</button>
     <button class="nbtn active"><div class="ni">🛍️</div>상점</button>
+    <button class="nbtn" onclick="goScreen('items')"><div class="ni">🎒</div>소지품</button>
+    <button class="nbtn" onclick="goScreen('mail')"><div class="ni">📬</div>우편<div class="nbadge mail-nav-badge" style="display:none;"></div></button>
+  </div>
+</div>
+
+<!-- 혜 귀인 픽업 배너 -->
+<div id="screen-banner" class="screen">
+  <div class="top-bar">
+    <button class="btn btn-gray" style="padding:5px 12px;font-size:12px;" onclick="goScreen('lobby')">← 돌아가기</button>
+    <div class="tb-title">🌸 픽업 소환</div>
+    <div class="currencies"><div class="cur">💎 <span id="d-banner">100</span></div></div>
+  </div>
+  <div class="scroll-content">
+    <div class="pk-hero">
+      <div class="pk-hero-art" id="pk-hero-art"></div>
+      <div class="pk-hero-info">
+        <div class="pk-hero-up">PICK UP</div>
+        <div class="pk-hero-nm">혜 귀인<span class="pk-ssr">★SSR</span></div>
+        <div class="pk-hero-de">HP 60% 이하 시 보호막 발동</div>
+        <div class="pk-hero-pe">📅 2026.06.19 ~ 2026.07.31</div>
+      </div>
+    </div>
+    <div class="pk-box">
+      <div class="pk-box-ti">✨ 픽업 확률 UP</div>
+      <div class="pk-rate-row"><span>SSR (등장 시 혜 귀인 100%)</span><span class="pk-up">1.5% → 3.0%</span></div>
+      <div class="pk-rate-row"><span>SR</span><span>12%</span></div>
+      <div class="pk-rate-row"><span>R</span><span style="color:var(--dim);">나머지</span></div>
+    </div>
+    <div class="pk-box">
+      <div class="pk-box-ti">🎯 천장 시스템</div>
+      <div class="pk-pity-la">천장까지 <b id="pk-pity-left">50</b>회 · 50회 소환 시 혜 귀인 확정</div>
+      <div class="pk-pity-bar"><div class="f" id="pk-pity-fill" style="width:0%"></div></div>
+    </div>
+    <div class="pk-btns">
+      <button class="pk-pull-btn" onclick="pullBanner(1)"><div class="pk-pull-nm">1회 소환</div><div class="pk-pull-co">💎 200</div></button>
+      <button class="pk-pull-btn feat" onclick="pullBanner(10)"><div class="pk-pull-badge">SR 이상 보장</div><div class="pk-pull-nm">10+1 소환</div><div class="pk-pull-co">💎 1,800</div></button>
+    </div>
+  </div>
+  <div class="bnav">
+    <button class="nbtn" onclick="goScreen('lobby')"><div class="ni">🏰</div>로비</button>
+    <button class="nbtn nav-battle-btn" onclick="goBattleOrDungeon()"><div class="ni">⚔️</div>전장</button>
+    <button class="nbtn" onclick="goScreen('lineup')"><div class="ni">👤</div>편성</button>
+    <button class="nbtn" onclick="goScreen('event')"><div class="ni">💕</div>이벤트</button>
+    <button class="nbtn" onclick="goScreen('shop')"><div class="ni">🛍️</div>상점</button>
     <button class="nbtn" onclick="goScreen('items')"><div class="ni">🎒</div>소지품</button>
     <button class="nbtn" onclick="goScreen('mail')"><div class="ni">📬</div>우편<div class="nbadge mail-nav-badge" style="display:none;"></div></button>
   </div>
@@ -1517,6 +1590,7 @@ function goScreen(name){
     else { resumeBattle(); }
   }
   if(name==='event')    updateEventScreen();
+  if(name==='banner')   renderBanner();
   if(name==='items')    renderItemsScreen();
   if(name==='lobby')    { updateCP(); updateLobby(); saveGame(); }
   if(name==='login')    { renderLoginSaves(); }
@@ -1640,7 +1714,7 @@ function fmtNum(n){
 function updateCur(){
   const g=fmtNum(S.gold),d=fmtNum(S.diamond);
   document.querySelectorAll('#g1,#g2,#g3').forEach(e=>{if(e)e.textContent=g;});
-  document.querySelectorAll('#d1,#d2,#d-ach').forEach(e=>{if(e)e.textContent=d;});
+  document.querySelectorAll('#d1,#d2,#d-ach,#d-banner').forEach(e=>{if(e)e.textContent=d;});
   // 소지품 화면 재화 갱신
   const ic=document.getElementById('inv-choco-cnt');if(ic)ic.textContent=S.choco;
   const ig=document.getElementById('inv-gold-val');if(ig)ig.textContent=g;
@@ -2767,6 +2841,39 @@ function showGachaResult(results){
   if(rC>0)parts.push(`<span style="color:var(--blue);">R ${rC}개</span>`);
   document.getElementById('gacha-sum').innerHTML='획득: '+parts.join(' · ')+'<br><span style="color:var(--dim);font-size:10px;">조각은 소지품 화면에서 확인하세요</span>';
   document.getElementById('ov-gacha').classList.add('active');
+}
+
+// ─── 혜 귀인 픽업 배너 ───
+const BANNER = {
+  single: { count:1,  cost:200 },
+  multi:  { count:10, cost:1800, guaranteeSR:true },  // ⚠ BUG-004: '10+1' 라벨이지만 보너스 1회 누락 (11이어야 함)
+};
+function openBanner(){ goScreen('banner'); }
+function renderBanner(){
+  const art=document.getElementById('pk-hero-art');
+  const hye=CHARS.find(c=>c.id==='hye');
+  if(art) art.innerHTML=buildPortrait(hye,'lobby');
+  const left=GACHA_PITY_CAP - S.gachaPity;
+  const el=document.getElementById('pk-pity-left'); if(el) el.textContent=left;
+  const fill=document.getElementById('pk-pity-fill'); if(fill) fill.style.width=(S.gachaPity/GACHA_PITY_CAP*100)+'%';
+  updateCur();
+}
+function pullBanner(mode){
+  const cfg = mode===10 ? BANNER.multi : BANNER.single;
+  if(S.diamond < cfg.cost){ showToast('다이아가 부족합니다!'); return; }
+  S.diamond -= cfg.cost; updateCur();
+  const count = cfg.count;          // BUG-004: multi=10 (광고된 11회보다 1회 적게 지급)
+  S.totalPulls += count;
+  const results=[];
+  for(let i=0;i<count;i++){
+    const lastGuarantee = cfg.guaranteeSR && i===count-1 && !results.some(r=>r.grade!=='R');
+    results.push(pullOne({pickup:true, forceSR:lastGuarantee}));
+  }
+  results.forEach(r=>{ S.shards[r.id]=(S.shards[r.id]||0)+1; });
+  saveGame();
+  updateAchieveBadge();
+  renderBanner();
+  showGachaResult(results);
 }
 
 // ─── SHOP ───
