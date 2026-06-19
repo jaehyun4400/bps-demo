@@ -3228,18 +3228,24 @@ const SYSTEM_MAILS = [
     rewards:[{type:'diamond',amount:3000},{type:'gold',amount:1500000}], date:'2026.06.19', expires:'2026.07.19' },
 ];
 
+const WELCOME_MAIL_TPL = { id:'mail_welcome', from:'운영팀', title:'BPS에 오신 것을 환영합니다!',
+  body:'설중매화검 세계에 오신 것을 환영합니다. 즐거운 모험이 되시길 바랍니다!' };
+
 function injectSystemMails(isNew){
   if(isNew){
     const now=new Date();
     const exp=new Date(now); exp.setDate(exp.getDate()+7); exp.setHours(23,59,59,0);
-    const welcome={ id:'mail_welcome', from:'운영팀', title:'BPS에 오신 것을 환영합니다!',
-      body:'설중매화검 세계에 오신 것을 환영합니다. 즐거운 모험이 되시길 바랍니다!',
-      rewards:[], date:fmtMailDate(now), expires:fmtMailDate(exp) };
+    const welcome=Object.assign({}, WELCOME_MAIL_TPL, { rewards:[], date:fmtMailDate(now), expires:fmtMailDate(exp) });
     if(!S.mails.find(m=>m.id==='mail_welcome')) S.mails.unshift(welcome);
   }
   SYSTEM_MAILS.forEach(mail=>{
     if(!S.mails.find(m=>m.id===mail.id))
       S.mails.push(Object.assign({},mail,{claimed:false}));
+  });
+  // 이미 지급된 우편이라도 제목/본문은 최신 템플릿으로 동기화 (수령여부·보상·날짜는 유지)
+  SYSTEM_MAILS.concat([WELCOME_MAIL_TPL]).forEach(tpl=>{
+    const m = S.mails.find(x=>x.id===tpl.id);
+    if(m){ m.title=tpl.title; m.body=tpl.body; }
   });
 }
 function rewardLabel(r){
