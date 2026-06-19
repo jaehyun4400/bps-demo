@@ -517,7 +517,7 @@ body { background:#0a0a0a; display:flex; justify-content:center; align-items:cen
 .mail-card-title { font-size:13px; font-weight:bold; color:var(--text); }
 .mail-card-from { font-size:10px; color:var(--gold); }
 .mail-card-date { font-size:9px; color:var(--dim); white-space:nowrap; }
-.mail-card-body { font-size:11px; color:var(--dim); line-height:1.5; }
+.mail-card-body { font-size:11px; color:var(--dim); line-height:1.5; white-space:pre-line; }
 .mail-card-rewards { display:flex; gap:6px; flex-wrap:wrap; }
 .mail-reward-chip { background:rgba(212,168,67,.12); border:1px solid rgba(212,168,67,.3); border-radius:20px; padding:3px 10px; font-size:11px; color:var(--gold); }
 .mail-card-foot { display:flex; justify-content:space-between; align-items:center; }
@@ -561,7 +561,7 @@ body { background:#0a0a0a; display:flex; justify-content:center; align-items:cen
     <div class="t-kr">매화도지하설</div>
     <div class="t-flower">🌸</div>
     <div class="t-tap">▶ 터치하여 시작</div>
-    <div class="t-ver">v1.2.0 · 두근두근 발렌타인 업데이트</div>
+    <div class="t-ver">v1.3.0 · 신나는 여름방학!! 🌴🏖️</div>
   </div>
 </div>
 
@@ -1018,7 +1018,8 @@ body { background:#0a0a0a; display:flex; justify-content:center; align-items:cen
 
 <script>
 // ─── SAVE / LOAD ───
-const SAVE_PREFIX = 'bps_v120_';
+const SAVE_PREFIX = 'bps_v130_';
+const SAVE_PREFIX_LEGACY = 'bps_v120_';  // v1.2.0 저장 데이터 호환 (마이그레이션용)
 let currentNick = '';
 
 function saveGame(){
@@ -1047,7 +1048,10 @@ function saveGame(){
 }
 
 function loadSave(nick){
-  try { return JSON.parse(localStorage.getItem(SAVE_PREFIX+nick)||'null'); } catch(e){ return null; }
+  try {
+    const raw = localStorage.getItem(SAVE_PREFIX+nick) || localStorage.getItem(SAVE_PREFIX_LEGACY+nick);
+    return JSON.parse(raw||'null');
+  } catch(e){ return null; }
 }
 
 function applyData(data){
@@ -1084,12 +1088,14 @@ function applyData(data){
 }
 
 function getSavedNicks(){
-  const nicks=[];
+  const nicks=new Set();
   for(let i=0;i<localStorage.length;i++){
     const k=localStorage.key(i);
-    if(k&&k.startsWith(SAVE_PREFIX)) nicks.push(k.slice(SAVE_PREFIX.length));
+    if(!k) continue;
+    if(k.startsWith(SAVE_PREFIX)) nicks.add(k.slice(SAVE_PREFIX.length));
+    else if(k.startsWith(SAVE_PREFIX_LEGACY)) nicks.add(k.slice(SAVE_PREFIX_LEGACY.length));
   }
-  return nicks.sort();
+  return [...nicks].sort();
 }
 
 function doLogin(){
@@ -1148,6 +1154,7 @@ function quickLogin(nick){
 function deleteSave(nick){
   if(!confirm(`'${nick}' 저장 데이터를 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`)) return;
   localStorage.removeItem(SAVE_PREFIX+nick);
+  localStorage.removeItem(SAVE_PREFIX_LEGACY+nick);
   renderLoginSaves();
   showToast('저장 데이터를 삭제했습니다.');
 }
@@ -1386,7 +1393,7 @@ const S = {
   running:false, fast:false, repeatFarm:false, repeatCount:0, autoDive:false,
   timer:null, enemies:[], playerHp:0, playerMaxHp:0,
   shield:0, shieldCooldownEnd:0,
-  stageKills:0, evShown:false,
+  stageKills:0,
   exStocks:{e1:3,e2:5,e3:10,e4:1},
   items:{enhStone:0, expPotion:0, awaken:0},
   shards:{gungny:0, choisg:0, gungny2:0, hye:0},
@@ -1641,9 +1648,6 @@ function gotoLobby(){
   if(!_checkinAutoShown && canCheckInToday()){
     _checkinAutoShown=true;
     setTimeout(openCheckIn,500);
-  } else if(!S.evShown){
-    S.evShown=true;
-    setTimeout(showEvPopup,500);
   }
 }
 function showEvPopup(){document.getElementById('ov-event').classList.add('active');}
@@ -1691,7 +1695,7 @@ function claimCheckIn(){
   if(r.type==='gold') S.gold+=r.amount; else S.diamond+=r.amount;
   S.lastCheckIn=ciTodayStr();
   S.checkInDay++;
-  // ⚠ BUG-003 (Major): Day 7 수령 후 checkInDay 0 리셋 코드 누락 → 사이클 리셋 불가
+  // ⚠ BUG-001 (Major, qa/1.3/BUG_REPORT.md): Day 7 수령 후 checkInDay 0 리셋 코드 누락 → 사이클 리셋 불가
   // if(S.checkInDay>=CHECKIN_REWARDS.length) S.checkInDay=0;
   updateCur(); saveGame();
   renderCheckIn(); updateCheckInBadge();
@@ -2846,7 +2850,7 @@ function showGachaResult(results){
 // ─── 혜 귀인 픽업 배너 ───
 const BANNER = {
   single: { count:1,  cost:200 },
-  multi:  { count:10, cost:1800, guaranteeSR:true },  // ⚠ BUG-004: '10+1' 라벨이지만 보너스 1회 누락 (11이어야 함)
+  multi:  { count:10, cost:1800, guaranteeSR:true },  // ⚠ BUG-002 (Major, qa/1.3/BUG_REPORT.md): '10+1' 라벨이지만 보너스 1회 누락 (11이어야 함)
 };
 function openBanner(){ goScreen('banner'); }
 function renderBanner(){
@@ -2862,7 +2866,7 @@ function pullBanner(mode){
   const cfg = mode===10 ? BANNER.multi : BANNER.single;
   if(S.diamond < cfg.cost){ showToast('다이아가 부족합니다!'); return; }
   S.diamond -= cfg.cost; updateCur();
-  const count = cfg.count;          // BUG-004: multi=10 (광고된 11회보다 1회 적게 지급)
+  const count = cfg.count;          // BUG-002 (qa/1.3): multi=10 (광고된 11회보다 1회 적게 지급)
   S.totalPulls += count;
   const results=[];
   for(let i=0;i<count;i++){
@@ -3216,6 +3220,12 @@ const SYSTEM_MAILS = [
   { id:'mail_update_v117', from:'운영팀', title:'BPS v1.17 업데이트 기념',
     body:'v1.17 업데이트를 기념하여 보상을 드립니다. 앞으로도 BPS를 사랑해 주세요!',
     rewards:[{type:'diamond',amount:10000},{type:'gold',amount:10000000}], date:'2026.04.24', expires:'2026.05.24' },
+  { id:'mail_update_v130_notice', from:'운영팀', title:'v1.3.0 업데이트 안내 — 신나는 여름방학!! 🌴🏖️',
+    body:'안녕하세요, 매화도지하설 운영팀입니다.\nv1.3.0 업데이트로 \'신나는 여름방학!!\' 시즌이 시작되었습니다.\n로비 우측 상단의 🌸 출석 아이콘을 눌러 매일 출석 보상을 확인해 보세요.\n7일간 누적 출석 시 골드와 다이아 등 다양한 보상을 받으실 수 있습니다.\n앞으로도 더 즐거운 BPS가 되도록 노력하겠습니다. 감사합니다.',
+    rewards:[], date:'2026.06.19', expires:'2026.07.19' },
+  { id:'mail_update_v130_patch', from:'운영팀', title:'v1.3.0 업데이트 완료 안내',
+    body:'안녕하세요, 매화도지하설 운영팀입니다.\nv1.3.0 업데이트가 완료되었습니다. 점검 시간 동안 불편을 드려 죄송합니다.\n점검 보상을 드리니 확인해 주세요. 항상 응원해 주셔서 감사합니다.',
+    rewards:[{type:'diamond',amount:3000},{type:'gold',amount:1500000}], date:'2026.06.19', expires:'2026.07.19' },
 ];
 
 function injectSystemMails(isNew){
