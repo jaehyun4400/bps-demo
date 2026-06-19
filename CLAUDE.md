@@ -191,7 +191,7 @@ lastCheckIn: '',     // 마지막 수령 날짜 'YYYY-MM-DD'  (saveGame/applyDat
 - `BANNER.multi.count`가 11이 아닌 **10**으로 설정 → "10+1 소환"인데 10회만 지급
 - 증상: 결과 카드 10장, 타이틀도 "소환 결과"(10+1 분기 미적용), 획득 합계 10개
 - 검증: 브라우저 10+1 소환 → 카드 10장 확인 (`qa/attachments/BUG-004_multi_10cards.png`)
-- 리포트: `qa/BUG_REPORT.md` BUG-004 (연결 TC-017)
+- 리포트: `qa/BUG_REPORT.md` BUG-004 (연결 TC-040)
 
 ---
 
