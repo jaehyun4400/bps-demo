@@ -90,6 +90,26 @@ body { background:#0a0a0a; display:flex; justify-content:center; align-items:cen
 .lb-gobtn:active { transform:scale(.96); }
 .lb-redeem-btn { position:absolute; bottom:70px; left:50%; transform:translateX(-50%); background:none; border:1px solid var(--bordg); border-radius:16px; padding:4px 14px; font-size:10px; color:var(--dim); cursor:pointer; white-space:nowrap; }
 .lb-redeem-btn:active { opacity:.7; }
+/* 출석 체크 원형 아이콘 */
+.lb-checkin-btn { position:absolute; top:12px; right:12px; width:56px; height:56px; border-radius:50%; background:radial-gradient(circle at 38% 32%,#fff3c0,var(--gold) 55%,var(--gold-d)); border:2px solid var(--gold-l); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px; cursor:pointer; color:#3a2000; font-size:9px; font-weight:bold; box-shadow:0 0 16px rgba(212,168,67,.55),inset 0 1px 2px rgba(255,255,255,.5); z-index:6; animation:checkinPulse 2.2s ease-in-out infinite; }
+.lb-checkin-btn .ci-ic { font-size:21px; line-height:1; }
+.lb-checkin-btn:active { transform:scale(.92); }
+@keyframes checkinPulse { 0%,100%{box-shadow:0 0 12px rgba(212,168,67,.45),inset 0 1px 2px rgba(255,255,255,.5);} 50%{box-shadow:0 0 22px rgba(240,200,96,.85),inset 0 1px 2px rgba(255,255,255,.5);} }
+.lb-checkin-badge { position:absolute; top:-2px; right:-2px; background:var(--red); color:#fff; font-size:9px; font-weight:bold; min-width:16px; height:16px; border-radius:50%; display:none; align-items:center; justify-content:center; padding:0 3px; border:1.5px solid #120408; }
+/* 출석 팝업 그리드 */
+.ci-cycle { text-align:center; color:var(--gold-l); font-size:12px; margin-bottom:12px; }
+.ci-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; }
+.ci-slot { position:relative; background:#1a0c10; border:1px solid var(--bordg); border-radius:8px; padding:7px 3px 6px; text-align:center; }
+.ci-slot.d7 { grid-column:span 1; border-color:var(--gold); background:linear-gradient(180deg,#2a1c00,#160d00); }
+.ci-slot.claimed { opacity:.42; }
+.ci-slot.today { border-color:var(--gold-l); background:#241400; box-shadow:0 0 10px rgba(240,200,96,.5); }
+.ci-day { font-size:9px; color:var(--dim); font-weight:bold; }
+.ci-slot.today .ci-day { color:var(--gold-l); }
+.ci-rico { font-size:19px; margin:2px 0 1px; }
+.ci-ramt { font-size:9px; color:var(--gold); font-weight:bold; line-height:1.2; }
+.ci-chk { position:absolute; top:2px; right:3px; font-size:10px; color:var(--gold-l); }
+.ci-claim-btn { width:100%; margin-top:14px; background:linear-gradient(180deg,var(--gold-l),var(--gold)); color:#120508; border:none; border-radius:10px; padding:11px; font-size:14px; font-weight:bold; cursor:pointer; }
+.ci-claim-btn:disabled { background:#2a1015; color:var(--dim); cursor:default; }
 .redeem-input { width:100%; background:#0a0305; border:1px solid var(--bordg); border-radius:6px; padding:10px 12px; color:var(--gold-l); font-size:15px; text-align:center; letter-spacing:3px; text-transform:uppercase; outline:none; margin:8px 0; }
 .redeem-input::placeholder { color:var(--dim); letter-spacing:1px; font-size:12px; text-transform:none; }
 .redeem-input:focus { border-color:var(--gold); }
@@ -528,6 +548,7 @@ body { background:#0a0a0a; display:flex; justify-content:center; align-items:cen
   </div>
   <div class="lobby-world">
     <div id="lobby-stars"></div>
+    <div class="lb-checkin-btn" onclick="openCheckIn()"><div class="ci-ic">📅</div><div>출석</div><div class="lb-checkin-badge" id="checkin-badge">!</div></div>
     <div class="lb-bgtxt">BLADES OF PLUMFLOWER</div>
     <div class="lb-char" id="lb-char">👩</div>
     <div class="lb-name" id="lb-cname">궁중시녀</div>
@@ -852,6 +873,21 @@ body { background:#0a0a0a; display:flex; justify-content:center; align-items:cen
   </div>
 </div>
 
+<!-- 출석 체크 POPUP -->
+<div class="overlay" id="ov-checkin">
+  <div class="popup gpop" style="width:320px;">
+    <div class="ph"><div class="ph-em">🌸</div><div class="ph-ti">여름방학맞이</div><div class="ph-su">7days 특별 출석이벤트</div></div>
+    <div class="pb">
+      <div class="ci-cycle">이번 사이클: <b id="ci-progress" style="color:var(--gold);">0</b>/7일 완료</div>
+      <div class="ci-grid" id="ci-grid"></div>
+      <button class="ci-claim-btn" id="ci-claim-btn" onclick="claimCheckIn()">오늘 보상 수령</button>
+    </div>
+    <div class="pf">
+      <button class="btn btn-gray" style="flex:1;" onclick="closeOv('ov-checkin')">닫기</button>
+    </div>
+  </div>
+</div>
+
 <!-- PURCHASE POPUP -->
 <div class="overlay" id="ov-buy">
   <div class="popup gpop">
@@ -931,6 +967,7 @@ function saveGame(){
     achievements: JSON.parse(JSON.stringify(S.achievements)),
     totalPulls:S.totalPulls, totalUpgrades:S.totalUpgrades,
     mails: JSON.parse(JSON.stringify(S.mails)),
+    checkInDay:S.checkInDay, lastCheckIn:S.lastCheckIn,
     savedAt: Date.now(),
   };
   try { localStorage.setItem(SAVE_PREFIX+currentNick, JSON.stringify(snap)); } catch(e){}
@@ -969,6 +1006,8 @@ function applyData(data){
   if(d(data.totalPulls))    S.totalPulls=data.totalPulls;
   if(d(data.totalUpgrades)) S.totalUpgrades=data.totalUpgrades;
   if(data.mails) S.mails = data.mails;
+  if(d(data.checkInDay))  S.checkInDay=data.checkInDay;
+  if(d(data.lastCheckIn)) S.lastCheckIn=data.lastCheckIn;
 }
 
 function getSavedNicks(){
@@ -994,6 +1033,7 @@ function doLogin(){
   updateCur();updateCP();renderLineupHeader();updateLobby();
   updateAchieveBadge();
   updateMailBadge();
+  updateCheckInBadge();
   goScreen('title');
   if(data){
     const dt=new Date(data.savedAt);
@@ -1284,6 +1324,7 @@ const S = {
   stageClears: {}, achievements: {}, totalPulls:0, totalUpgrades:0, fieldKills:0,
   redeemedCodes: [],
   mails: [],
+  checkInDay:0, lastCheckIn:'',
   playerX:195, playerY:175, joyBaseX:0, joyBaseY:0, joyActive:false, moveDir:null, playerTargetIdx:-1,
   // 레벨 / 경험치 / 능력치 강화 (캐릭터별)
   charLevels:   {gungny:1, choisg:1, gungny2:1, hye:1},
@@ -1520,9 +1561,72 @@ function goBattleOrDungeon(){
   if(_inBattle) goScreen('battle');
   else goScreen('dungeon');
 }
-function gotoLobby(){goScreen('lobby');if(!S.evShown){S.evShown=true;setTimeout(showEvPopup,500);}}
+function gotoLobby(){
+  goScreen('lobby');
+  updateCheckInBadge();
+  if(!_checkinAutoShown && canCheckInToday()){
+    _checkinAutoShown=true;
+    setTimeout(openCheckIn,500);
+  } else if(!S.evShown){
+    S.evShown=true;
+    setTimeout(showEvPopup,500);
+  }
+}
 function showEvPopup(){document.getElementById('ov-event').classList.add('active');}
 function closeOv(id){document.getElementById(id).classList.remove('active');}
+
+// ─── 출석 체크 (여름방학맞이 7days 특별 출석이벤트) ───
+const CHECKIN_REWARDS = [
+  {type:'gold',    amount:500000,  icon:'💰', label:'50만'},
+  {type:'diamond', amount:2500,    icon:'💎', label:'2,500'},
+  {type:'gold',    amount:1500000, icon:'💰', label:'150만'},
+  {type:'diamond', amount:5000,    icon:'💎', label:'5,000'},
+  {type:'gold',    amount:2500000, icon:'💰', label:'250만'},
+  {type:'diamond', amount:10000,   icon:'💎', label:'1만'},
+  {type:'diamond', amount:25000,   icon:'🎁', label:'2.5만'},
+];
+let _checkinAutoShown=false;
+function ciTodayStr(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+function canCheckInToday(){ return ciTodayStr()!==S.lastCheckIn; }
+function openCheckIn(){ renderCheckIn(); document.getElementById('ov-checkin').classList.add('active'); }
+function renderCheckIn(){
+  const grid=document.getElementById('ci-grid');
+  if(!grid) return;
+  const done=S.checkInDay;            // 완료 일수 = 다음 수령 슬롯 인덱스
+  grid.innerHTML=CHECKIN_REWARDS.map((r,i)=>{
+    const claimed=i<done;
+    const today=(i===done)&&canCheckInToday();
+    const cls=`ci-slot${i===6?' d7':''}${claimed?' claimed':''}${today?' today':''}`;
+    return `<div class="${cls}">
+      ${claimed?'<div class="ci-chk">✔</div>':''}
+      <div class="ci-day">${i===6?'🎁 Day 7':'Day '+(i+1)}</div>
+      <div class="ci-rico">${r.icon}</div>
+      <div class="ci-ramt">${r.label}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('ci-progress').textContent=Math.min(done,7);
+  const btn=document.getElementById('ci-claim-btn');
+  const claimable=canCheckInToday() && S.checkInDay < CHECKIN_REWARDS.length;
+  btn.disabled=!claimable;
+  btn.textContent=claimable ? '오늘 보상 수령' : (canCheckInToday() ? '수령 완료' : '오늘은 이미 수령했습니다');
+}
+function claimCheckIn(){
+  if(!canCheckInToday()) return;
+  const r=CHECKIN_REWARDS[S.checkInDay];
+  if(!r){ renderCheckIn(); return; }
+  if(r.type==='gold') S.gold+=r.amount; else S.diamond+=r.amount;
+  S.lastCheckIn=ciTodayStr();
+  S.checkInDay++;
+  // ⚠ BUG-003 (Major): Day 7 수령 후 checkInDay 0 리셋 코드 누락 → 사이클 리셋 불가
+  // if(S.checkInDay>=CHECKIN_REWARDS.length) S.checkInDay=0;
+  updateCur(); saveGame();
+  renderCheckIn(); updateCheckInBadge();
+  showToast(`🌸 출석 보상 수령! ${rewardLabel(r)}`);
+}
+function updateCheckInBadge(){
+  const b=document.getElementById('checkin-badge');
+  if(b) b.style.display=canCheckInToday() ? 'flex' : 'none';
+}
 function exitBattle(){stopBattle();_inBattle=false;S.repeatFarm=false;updateRepeatBtn();goScreen('lobby');}
 
 // ─── CURRENCY & LOBBY ───
