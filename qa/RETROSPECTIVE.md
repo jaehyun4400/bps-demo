@@ -1,8 +1,8 @@
 # QA 회고 (Retrospective) — BPS 포트폴리오
 
-**프로젝트**: Blades of Plumflower Beneath Snow (BPS)
-**대상**: v1.2.0 / v1.3.0 업데이트
-**작성자**: 박재현
+**프로젝트**: Blades of Plumflower Beneath Snow (BPS)  
+**대상**: v1.2.0 / v1.3.0 업데이트  
+**작성자**: 박재현  
 **최종 수정일**: 2026-06-25
 
 > 본 문서는 BPS 포트폴리오의 **테스트 범위를 정의**하고, 실제 모바일 라이브 게임 QA였다면
